@@ -1,4 +1,6 @@
 ﻿#include "LearnExtender.h"
+
+#include "ContentBrowserModule.h"
 #include "LevelEditor.h"
 #include "Modules/ModuleManager.h"
 #include "Widgets/Input/SSlider.h"
@@ -9,17 +11,19 @@ using EExtensionHook::Position;
 
 FLearnExtenderModule::FLearnExtenderModule()
 	: LevelEditorModule(FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor"))
+	, ContentBrowserModule(FModuleManager::LoadModuleChecked<FContentBrowserModule>(TEXT("ContentBrowser")))
 {
 }
 
 void FLearnExtenderModule::StartupModule()
 {
 	GLog->Log("LearnExtenderModule is Starting");
-	Extender = MakeShareable(new FExtender);
+	LevelEditorExtender = MakeShareable(new FExtender);
     
 	StartUpMenuBarExtension();
 	StartUpMenuExtension();
 	StartUpToolBarExtension();
+	StartUpContentBrowserExtension();
 }
 
 void FLearnExtenderModule::ShutdownModule()
@@ -28,9 +32,6 @@ void FLearnExtenderModule::ShutdownModule()
 	ShutdownMenuExtension();
 	ShutDownMenuBarBarExtension();
 	ShutdownToolBarExtension();
-    
-	if (Extender.IsValid())
-		Extender.Reset();
 }
 
 void FLearnExtenderModule::StartUpMenuBarExtension()
@@ -38,13 +39,13 @@ void FLearnExtenderModule::StartUpMenuBarExtension()
 	FMenuBarExtensionDelegate MenubarExtensionDelegate;
 	MenubarExtensionDelegate.BindRaw(this, &FLearnExtenderModule::MenuBarExtensionDelegate);
     
-	MenuBarExtensions.Add(Extender->AddMenuBarExtension("Help", Position::After, nullptr, MenubarExtensionDelegate));
-	LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(Extender);
+	MenuBarExtensions.Add(LevelEditorExtender->AddMenuBarExtension("Help", Position::After, nullptr, MenubarExtensionDelegate));
+	LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(LevelEditorExtender);
 }
 
 void FLearnExtenderModule::StartUpMenuExtension()
 {
-	    FMenuExtensionDelegate Delegate;
+	FMenuExtensionDelegate Delegate;
     Delegate.BindLambda([](FMenuBuilder & MenuBuilder)->void {
         
         MenuBuilder.AddMenuSeparator("MenuSeparator");
@@ -176,13 +177,18 @@ void FLearnExtenderModule::StartUpMenuExtension()
         MenuBuilder.EndSection();
     });
 
-    Extender->AddMenuExtension("MenuElement01", Position::After,nullptr, Delegate);
-    LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(Extender);
+    LevelEditorExtender->AddMenuExtension(
+    	"MenuElement01",
+    	Position::After,
+    	nullptr,
+    	Delegate
+    );
+    LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(LevelEditorExtender);
 }
 
 void FLearnExtenderModule::StartUpToolBarExtension()
 {
-	    GLog->Log("StartUpToolBarExtension");
+	GLog->Log("StartUpToolBarExtension");
     FToolBarExtensionDelegate Delegate; // DECLARE_DELEGATE_OneParam( FToolBarExtensionDelegate, class FToolBarBuilder& )
     Delegate.BindLambda([](FToolBarBuilder & InToolBarBuilder) {
         InToolBarBuilder.AddSeparator();
@@ -230,13 +236,32 @@ void FLearnExtenderModule::StartUpToolBarExtension()
         // InToolBarBuilder.AddWidget();
         
     });
-    Extender->AddToolBarExtension(
+    LevelEditorExtender->AddToolBarExtension(
         "Play",
         EExtensionHook::After,
         MakeShareable(new FUICommandList()),
         Delegate
     );
-    LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(Extender);
+    LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(LevelEditorExtender);
+}
+
+void FLearnExtenderModule::StartUpContentBrowserExtension()
+{
+	TArray<FContentBrowserMenuExtender_SelectedPaths> & SelectedPathsExtenderDelegates
+		= ContentBrowserModule.GetAllPathViewContextMenuExtenders();
+	
+	const FContentBrowserMenuExtender_SelectedPaths PathExtenderDelegate
+		= FContentBrowserMenuExtender_SelectedPaths::CreateRaw(this, &FLearnExtenderModule::OnExtendPathMenu);
+	SelectedPathsExtenderDelegates.Add(PathExtenderDelegate);
+
+	/*=========================================================================*/
+
+	TArray<FContentBrowserMenuExtender_SelectedAssets> & SelectedAssetsExtenderDelegates
+		= ContentBrowserModule.GetAllAssetViewContextMenuExtenders();
+	
+	const FContentBrowserMenuExtender_SelectedAssets AssetExtenderDelegate
+		= FContentBrowserMenuExtender_SelectedAssets::CreateRaw(this, &FLearnExtenderModule::OnExtendAssetMenu);
+	SelectedAssetsExtenderDelegates.Add(AssetExtenderDelegate);
 }
 
 void FLearnExtenderModule::ShutDownMenuBarBarExtension()
@@ -261,10 +286,10 @@ void FLearnExtenderModule::MenuBarExtensionDelegate( FMenuBarBuilder & MenuBarBu
 			FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Blueprint"),
 			FUIAction(FExecuteAction::CreateLambda([]()->void {
 				UE_LOG(LogTemp, Log, TEXT("Hello MenuElement01"))
-		})),
-		"MenuElement01"
-	);
-});
+			})),
+			"MenuElement01"
+		);
+	});
     
 	MenuBarBuilder.AddPullDownMenu(
 		FText::FromString("Menu01"),
@@ -305,6 +330,92 @@ void FLearnExtenderModule::MenuBarExtensionDelegate( FMenuBarBuilder & MenuBarBu
 		"CUSTOM MENU02"
 	);
 }
+
+
+TSharedRef<FExtender> FLearnExtenderModule::OnExtendPathMenu( const TArray<FString> & SelectedPaths )
+{
+	GLog->Log("Right Clicked On Folder");
+	for(const FString & Path : SelectedPaths)
+		GLog->Logf(L"\t%s", *Path);
+	
+	TSharedRef<FExtender> ContentBrowserExtender = MakeShareable(new FExtender());
+	
+	if(SelectedPaths.Num()>0)
+	{
+		ContentBrowserExtender->AddMenuExtension(
+			FName("NewFolder"),
+			EExtensionHook::Before,
+			nullptr, 
+			FMenuExtensionDelegate::CreateRaw(this,&FLearnExtenderModule::AddContentBrowserMenuEntry)
+		);
+		FolderPathsSelected = SelectedPaths;
+	}
+	
+	return ContentBrowserExtender;
+}
+
+TSharedRef<FExtender> FLearnExtenderModule::OnExtendAssetMenu( const TArray<FAssetData> & SelectedAssets )
+{
+	GLog->Log("Right Clicked On Asset");
+	for(const FAssetData & Asset : SelectedAssets)
+		GLog->Logf(L"\t%s", *Asset.GetFullName());
+
+	TSharedRef<FExtender> ContentBrowserExtender = MakeShareable(new FExtender());
+
+	if(SelectedAssets.Num()>0)
+	{
+		ContentBrowserExtender->AddMenuExtension(
+			FName("GetAssetActions"),
+			EExtensionHook::Before,
+			nullptr, 
+			FMenuExtensionDelegate::CreateRaw(this,&FLearnExtenderModule::AddContentBrowserMenuEntry)
+		);
+		AssetsDataSelected = SelectedAssets;
+	}
+	
+	return ContentBrowserExtender;
+}
+
+void FLearnExtenderModule::AddContentBrowserMenuEntry( FMenuBuilder & MenuBuilder )
+{
+	FExecuteAction Delegate01 = FExecuteAction::CreateLambda([this]()->void {
+		GLog->Log(TEXT("CB Menu Entry01 Test Selected"));
+	});
+	FExecuteAction Delegate02 = FExecuteAction::CreateLambda([this]()->void {
+		GLog->Log(TEXT("CB Menu Entry02 Test Selected"));
+	});
+	FExecuteAction Delegate03 = FExecuteAction::CreateLambda([this]()->void {
+		GLog->Log(TEXT("CB Menu Entry03 Test Selected"));
+	});
+	
+	MenuBuilder.AddMenuEntry
+	(
+		FText::FromString(TEXT("CB Menu Entry 01 Test")),
+		FText::FromString(TEXT("ToolTip for CB Menu Entry 01 Test")),
+		FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Blueprint"),
+		Delegate01
+	);
+	MenuBuilder.AddMenuEntry
+	(
+		FText::FromString(TEXT("CB Menu Entry 02 Test")),
+		FText::FromString(TEXT("ToolTip for CB Menu Entry 02 Test")),
+		FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Blueprint"),
+		Delegate02
+	);
+	MenuBuilder.AddMenuEntry
+	(
+		FText::FromString(TEXT("CB Menu Entry 03 Test")),
+		FText::FromString(TEXT("ToolTip for CB Menu Entry 03 Test")),
+		FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Blueprint"),
+		Delegate03
+	);
+}
+
+
+// TSharedRef<FExtender> FLearnExtenderModule::OnExtendAssetMenu( const TArray<FAssetData> & SelectedAssets )
+// {
+//
+// }
 
 #undef LOCTEXT_NAMESPACE
     

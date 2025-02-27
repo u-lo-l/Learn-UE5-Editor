@@ -5,7 +5,9 @@ public class LearnAssetDefinition : ModuleRules
     public LearnAssetDefinition(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
+        
+        PrivateIncludePaths.Add(ModuleDirectory);
+        
         PublicDependencyModuleNames.AddRange(
             new string[]
             {
@@ -19,7 +21,11 @@ public class LearnAssetDefinition : ModuleRules
                 "CoreUObject",
                 "Engine",
                 "Slate",
-                "SlateCore"
+                "SlateCore",
+                
+                "AssetTools",
+                "UnrealEd",
+                "InputCore",
             }
         );
     }
