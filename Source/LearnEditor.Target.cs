@@ -16,6 +16,6 @@ public class LearnEditorTarget : TargetRules
 
 	private void RegisterModulesCreatedByRider()
 	{
-		ExtraModuleNames.AddRange(new string[] { "LearnExtender", "LearnAssetDefinition" });
+		ExtraModuleNames.AddRange(new string[] { "LearnExtender" });
 	}
 }

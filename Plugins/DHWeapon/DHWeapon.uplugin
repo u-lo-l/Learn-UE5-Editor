@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "DHWeapon",
+	"Description": "Weapon Plugin for Project",
+	"Category": "Other",
+	"CreatedBy": "ulol",
+	"CreatedByURL": "https://u-lo-l.notion.site/19bbe883973b80e8bbe7e20b826391c1?v=1a1be883973b80c98808000cbcc281bb&pvs=4",
+	"DocsURL": "https://u-lo-l.notion.site/19bbe883973b80e8bbe7e20b826391c1?v=1a1be883973b80c98808000cbcc281bb&pvs=4",
+	"MarketplaceURL": "",
+	"SupportURL": "https://u-lo-l.notion.site/19bbe883973b80e8bbe7e20b826391c1?v=1a1be883973b80c98808000cbcc281bb&pvs=4",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "DHWeapon",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		}
+	]
+}

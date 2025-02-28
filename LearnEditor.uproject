@@ -13,14 +13,6 @@
 			"Name": "LearnExtender",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "LearnAssetDefinition",
-			"Type": "Editor",
-			"LoadingPhase": "Default",
-			"AdditionalDependencies": [
-				"AssetDefinition"
-			]
 		}
 	]
 }
