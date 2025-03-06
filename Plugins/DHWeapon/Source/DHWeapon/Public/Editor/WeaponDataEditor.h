@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 class SWeaponDataBrowser;
-class UWeaponDataAsset;
+class UDH_WeaponDataAsset;
 
 class DHWEAPON_API FWeaponDataEditor final
 	: public FAssetEditorToolkit
@@ -9,7 +9,7 @@ class DHWEAPON_API FWeaponDataEditor final
 	using ThisClass = FWeaponDataEditor;
 	friend class UAssetDefinition_WeaponDataAsset;
 public:
-	void OpenMyAssetEditor(UWeaponDataAsset* InAsset);
+	void OpenMyAssetEditor(UDH_WeaponDataAsset* InAsset);
 private:
 	FWeaponDataEditor();
 	static TSharedRef<FTabManager::FLayout> CreateTabLayout();
@@ -46,8 +46,8 @@ private:
 	TSharedPtr<SWeaponDataBrowser> BrowserTab = nullptr;
 	TSharedPtr<IDetailsView> DetailsTab = nullptr;
 
-	void OnOpenNewAsset(UWeaponDataAsset * InAsset);
-	TObjectPtr<UWeaponDataAsset> CurrentEditingAsset;
+	void OnOpenNewAsset(UDH_WeaponDataAsset * InAsset);
+	TObjectPtr<UDH_WeaponDataAsset> CurrentEditingAsset;
 
 	FPropertyEditorModule & PropertyEditorModule;
 };

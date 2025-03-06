@@ -4,7 +4,7 @@
 #include "DetailWidgetRow.h"
 #include "IDetailChildrenBuilder.h"
 #include "Components/UniformGridSlot.h"
-#include "Data/DamageData.h"
+#include "Data/DH_DamageData.h"
 #include "Style/WeaponDataStyle.h"
 
 TSharedRef<IPropertyTypeCustomization> FDamageDataInfoDetails::MakeInstance()
@@ -70,12 +70,12 @@ TSharedRef<SWidget> FDamageDataInfoDetails::HeaderValueContent
 	bool bUseEffect;
 	bool bUseCameraShake;
 
-	TSharedRef<IPropertyHandle> FinisherHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, bIsFinisher)).ToSharedRef();
-	TSharedRef<IPropertyHandle> NonBlockableHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, bIsNonBlockable)).ToSharedRef();
-	TSharedRef<IPropertyHandle> UseLaunchHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, bUseLaunch)).ToSharedRef();
-	TSharedRef<IPropertyHandle> UseSoundHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, bUseSound)).ToSharedRef();
-	TSharedRef<IPropertyHandle> UseEffectHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, bUseEffect)).ToSharedRef();
-	TSharedRef<IPropertyHandle> UseCameraShakeHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, bUseCameraShake)).ToSharedRef();
+	TSharedRef<IPropertyHandle> FinisherHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, bIsFinisher)).ToSharedRef();
+	TSharedRef<IPropertyHandle> NonBlockableHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, bIsNonBlockable)).ToSharedRef();
+	TSharedRef<IPropertyHandle> UseLaunchHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, bUseLaunch)).ToSharedRef();
+	TSharedRef<IPropertyHandle> UseSoundHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, bUseSound)).ToSharedRef();
+	TSharedRef<IPropertyHandle> UseEffectHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, bUseEffect)).ToSharedRef();
+	TSharedRef<IPropertyHandle> UseCameraShakeHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, bUseCameraShake)).ToSharedRef();
 
 	FinisherHandle->GetValue(bIsFinisher);
 	NonBlockableHandle->GetValue(bIsNonBlockable);
@@ -146,7 +146,7 @@ void FDamageDataInfoDetails::DamageSection
 	IDetailChildrenBuilder & ChildBuilder
 )
 {
-	TSharedRef<IPropertyHandle> FinisherHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, bIsFinisher)).ToSharedRef();
+	TSharedRef<IPropertyHandle> FinisherHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, bIsFinisher)).ToSharedRef();
 	bool bIsFinisher = false;
 	FinisherHandle->GetValue(bIsFinisher);
 	
@@ -171,7 +171,7 @@ void FDamageDataInfoDetails::LaunchSection
 )
 {
 	bool bUseLaunch;
-	const TSharedRef<IPropertyHandle> UseLaunchHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, bUseLaunch)).ToSharedRef();
+	const TSharedRef<IPropertyHandle> UseLaunchHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, bUseLaunch)).ToSharedRef();
 	UseLaunchHandle->GetValue(bUseLaunch);
 	
 	ChildBuilder.AddCustomRow(FText::FromString("Launch"))
@@ -195,7 +195,7 @@ void FDamageDataInfoDetails::SoundSection
 )
 {
 	bool bUseSound;
-	TSharedRef<IPropertyHandle> UseSoundHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, bUseSound)).ToSharedRef();
+	TSharedRef<IPropertyHandle> UseSoundHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, bUseSound)).ToSharedRef();
 	UseSoundHandle->GetValue(bUseSound);
 
 	ChildBuilder.AddCustomRow(FText::FromString("Sound"))
@@ -219,7 +219,7 @@ void FDamageDataInfoDetails::EffectSection
 )
 {
     bool bUseEffect;
-    const TSharedRef<IPropertyHandle> UseEffectHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, bUseEffect)).ToSharedRef();
+    const TSharedRef<IPropertyHandle> UseEffectHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, bUseEffect)).ToSharedRef();
     UseEffectHandle->GetValue(bUseEffect);
 
     ChildBuilder.AddCustomRow(FText::FromString("Hit Effect"))
@@ -243,7 +243,7 @@ void FDamageDataInfoDetails::CameraShakeSection
 )
 {
 	bool bUseCameraShake;
-	TSharedRef<IPropertyHandle> UseCameraShakeHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, bUseCameraShake)).ToSharedRef();
+	TSharedRef<IPropertyHandle> UseCameraShakeHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, bUseCameraShake)).ToSharedRef();
 	UseCameraShakeHandle->GetValue(bUseCameraShake);
 
 	ChildBuilder.AddCustomRow(FText::FromString("CameraShake"))
@@ -262,13 +262,13 @@ void FDamageDataInfoDetails::CameraShakeSection
 
 TSharedRef<SWidget> FDamageDataInfoDetails::DamageNameContent ( const TSharedRef<IPropertyHandle> & PropertyHandle )
 {
-	TSharedRef<IPropertyHandle> DamageHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, Damage)).ToSharedRef();
+	TSharedRef<IPropertyHandle> DamageHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, Damage)).ToSharedRef();
 	return DamageHandle->CreatePropertyNameWidget();
 }
 
 TSharedRef<SWidget> FDamageDataInfoDetails::DamageValueContent ( const TSharedRef<IPropertyHandle> & PropertyHandle )
 {
-	TSharedRef<IPropertyHandle> DamageHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, Damage)).ToSharedRef();
+	TSharedRef<IPropertyHandle> DamageHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, Damage)).ToSharedRef();
 	return SNew(SBox).MinDesiredWidth(200).MaxDesiredWidth(200)
 	[
 		DamageHandle->CreatePropertyValueWidget()
@@ -284,8 +284,8 @@ TSharedRef<SWidget> FDamageDataInfoDetails::LaunchNameContent ( const TSharedRef
 
 TSharedRef<SWidget> FDamageDataInfoDetails::LaunchValueContent ( const TSharedRef<IPropertyHandle> & PropertyHandle )
 {
-	TSharedRef<IPropertyHandle> LaunchPowerHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, LaunchPower)).ToSharedRef();
-	TSharedRef<IPropertyHandle> LaunchDirectionHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, LaunchDirection)).ToSharedRef();
+	TSharedRef<IPropertyHandle> LaunchPowerHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, LaunchPower)).ToSharedRef();
+	TSharedRef<IPropertyHandle> LaunchDirectionHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, LaunchDirection)).ToSharedRef();
 	return SNew(SVerticalBox)
 		+ SVerticalBox::Slot().VAlign(VAlign_Center).AutoHeight()
 		[
@@ -333,7 +333,7 @@ TSharedRef<SWidget> FDamageDataInfoDetails::SoundNameContent ( const TSharedRef<
 
 TSharedRef<SWidget> FDamageDataInfoDetails::SoundValueContent ( const TSharedRef<IPropertyHandle> & PropertyHandle )
 {
-	TSharedRef<IPropertyHandle> SoundHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, Sound)).ToSharedRef();
+	TSharedRef<IPropertyHandle> SoundHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, Sound)).ToSharedRef();
 
 	return SNew(SBox).MinDesiredWidth(500).MaxDesiredWidth(500)
 		[
@@ -349,9 +349,9 @@ TSharedRef<SWidget> FDamageDataInfoDetails::EffectNameContent ( const TSharedRef
 
 TSharedRef<SWidget> FDamageDataInfoDetails::EffectValueContent ( const TSharedRef<IPropertyHandle> & PropertyHandle )
 {
-	TSharedRef<IPropertyHandle> EffectHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, Effect)).ToSharedRef();
-	TSharedRef<IPropertyHandle> EffectOffsetHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, EffectOffset)).ToSharedRef();
-	TSharedRef<IPropertyHandle> EffectScaleHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, EffectScale)).ToSharedRef();
+	TSharedRef<IPropertyHandle> EffectHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, Effect)).ToSharedRef();
+	TSharedRef<IPropertyHandle> EffectOffsetHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, EffectOffset)).ToSharedRef();
+	TSharedRef<IPropertyHandle> EffectScaleHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, EffectScale)).ToSharedRef();
  
 	return SNew(SVerticalBox)
 		+ SVerticalBox::Slot().VAlign(VAlign_Center).AutoHeight()
@@ -407,7 +407,7 @@ TSharedRef<SWidget> FDamageDataInfoDetails::CameraShakeNameContent ( const TShar
 
 TSharedRef<SWidget> FDamageDataInfoDetails::CameraShakeValueContent ( const TSharedRef<IPropertyHandle> & PropertyHandle )
 {
-	TSharedRef<IPropertyHandle> CameraShakeHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, CameraShake)).ToSharedRef();
+	TSharedRef<IPropertyHandle> CameraShakeHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, CameraShake)).ToSharedRef();
 	return SNew(SBox).MinDesiredWidth(500).MaxDesiredWidth(500)
 		[
 			CameraShakeHandle->CreatePropertyValueWidget()

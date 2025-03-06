@@ -168,7 +168,10 @@ void WeaponDAEditorHelper::CustomPropertyArray(
 	END_BORDER_VALUECONTENT;
 }
 
-TSharedRef<SBox> WeaponDAEditorHelper::CreateSmallButton( const FOnClicked & OnClickedDelegate, FName IconName )
+/**
+ * @brief Create Small Button of Size 20 x 20
+ */
+TSharedRef<SBox> WeaponDAEditorHelper::CreateSmallButton( const FOnClicked & OnClickedDelegate, FName IconName, const FString & Tooltip )
 {
 	return
 		SNew(SBox)
@@ -185,6 +188,7 @@ TSharedRef<SBox> WeaponDAEditorHelper::CreateSmallButton( const FOnClicked & OnC
 				SNew(SImage)
 				.Image(FAppStyle::Get().GetBrush(IconName))
 				.ColorAndOpacity(FLinearColor(1,1,1,1))
+				.ToolTipText(FText::FromString(Tooltip))
 			]
 		];
 }

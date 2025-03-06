@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-class FDHWeaponModule : public IModuleInterface
+DECLARE_LOG_CATEGORY_EXTERN(Log_DHWeapon, Log, All);
+
+class FDHWeaponModule final : public IModuleInterface
 {
 public:
 	FDHWeaponModule();

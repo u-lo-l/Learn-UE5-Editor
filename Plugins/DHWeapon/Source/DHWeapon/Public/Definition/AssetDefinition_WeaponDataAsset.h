@@ -4,7 +4,7 @@
 #include "AssetDefinition.h"
 #include "AssetDefinition_WeaponDataAsset.generated.h"
 
-class UWeaponDataAsset;
+class UDH_WeaponDataAsset;
 class FWeaponDataEditor;
 
 UCLASS()
@@ -29,6 +29,6 @@ public:
 	virtual EAssetCommandResult OpenAssets(const FAssetOpenArgs& OpenArgs) const override;
 
 private:
-	static UWeaponDataAsset * FindCompatibleEditedAsset();
-	static FWeaponDataEditor * FindExistingEditor(UWeaponDataAsset * CompatibleEditedAsset);
+	static UDH_WeaponDataAsset * FindCompatibleEditedAsset();
+	static FWeaponDataEditor * FindExistingEditor(UDH_WeaponDataAsset * CompatibleEditedAsset);
 };

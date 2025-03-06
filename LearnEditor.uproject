@@ -7,7 +7,11 @@
 		{
 			"Name": "LearnEditor",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"DHWeapon",
+				"CoreUObject"
+			]
 		},
 		{
 			"Name": "LearnExtender",

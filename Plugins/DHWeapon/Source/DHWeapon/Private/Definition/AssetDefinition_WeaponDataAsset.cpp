@@ -1,5 +1,5 @@
 ﻿#include "Definition/AssetDefinition_WeaponDataAsset.h"
-#include "Data/WeaponDataAsset.h"
+#include "Data/DH_WeaponDataAsset.h"
 #include "Editor/WeaponDataEditor.h"
 
 
@@ -29,7 +29,7 @@ FText UAssetDefinition_WeaponDataAsset::GetAssetDisplayName() const
 
 TSoftClassPtr<> UAssetDefinition_WeaponDataAsset::GetAssetClass() const
 {
-	return UWeaponDataAsset::StaticClass();
+	return UDH_WeaponDataAsset::StaticClass();
 }
 
 FLinearColor UAssetDefinition_WeaponDataAsset::GetAssetColor() const
@@ -56,7 +56,7 @@ EAssetCommandResult UAssetDefinition_WeaponDataAsset::OpenAssets( const FAssetOp
 	const bool bForceNewEditor = FSlateApplication::Get().GetModifierKeys().IsShiftDown();
 	if (!bForceNewEditor)
 	{
-		UWeaponDataAsset * CompatibleEditedAsset = FindCompatibleEditedAsset();
+		UDH_WeaponDataAsset * CompatibleEditedAsset = FindCompatibleEditedAsset();
 		if (CompatibleEditedAsset != nullptr)
 		{
 			FWeaponDataEditor * ExistingEditor = FindExistingEditor(CompatibleEditedAsset);
@@ -69,19 +69,19 @@ EAssetCommandResult UAssetDefinition_WeaponDataAsset::OpenAssets( const FAssetOp
 	}
 #endif
 	TSharedRef<FWeaponDataEditor> Editor = MakeShareable<FWeaponDataEditor>(new FWeaponDataEditor());
-	Editor->OpenMyAssetEditor(Cast<UWeaponDataAsset>(AssetToOpen.GetAsset()));
+	Editor->OpenMyAssetEditor(Cast<UDH_WeaponDataAsset>(AssetToOpen.GetAsset()));
 	return EAssetCommandResult::Handled;
 }
 
-UWeaponDataAsset * UAssetDefinition_WeaponDataAsset::FindCompatibleEditedAsset()
+UDH_WeaponDataAsset * UAssetDefinition_WeaponDataAsset::FindCompatibleEditedAsset()
 {
-	UWeaponDataAsset * CompatibleEditedAsset = nullptr;
+	UDH_WeaponDataAsset * CompatibleEditedAsset = nullptr;
 #if WITH_EDITOR
 	TArray<UObject *> AllEditedAssets
 		= GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->GetAllEditedAssets();
 	for (UObject * EditedAsset : AllEditedAssets)
 	{
-		if (UWeaponDataAsset * EditedAnimAsset = Cast<UWeaponDataAsset>(EditedAsset))
+		if (UDH_WeaponDataAsset * EditedAnimAsset = Cast<UDH_WeaponDataAsset>(EditedAsset))
 		{
 			CompatibleEditedAsset = EditedAnimAsset;
 			break;
@@ -91,7 +91,7 @@ UWeaponDataAsset * UAssetDefinition_WeaponDataAsset::FindCompatibleEditedAsset()
 	return CompatibleEditedAsset;
 }
 
-FWeaponDataEditor * UAssetDefinition_WeaponDataAsset::FindExistingEditor( UWeaponDataAsset * CompatibleEditedAsset )
+FWeaponDataEditor * UAssetDefinition_WeaponDataAsset::FindExistingEditor( UDH_WeaponDataAsset * CompatibleEditedAsset )
 {
 	TArray<IAssetEditorInstance *> AssetEditors
 		= GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->FindEditorsForAsset(CompatibleEditedAsset);

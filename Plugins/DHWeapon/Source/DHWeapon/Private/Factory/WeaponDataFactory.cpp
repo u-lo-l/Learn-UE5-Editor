@@ -1,11 +1,11 @@
 ﻿#include "Factory/WeaponDataFactory.h"
 
-#include "Data/WeaponDataAsset.h"
+#include "Data/DH_WeaponDataAsset.h"
 
 UWeaponDataFactory::UWeaponDataFactory()
 {
 	bCreateNew = true;
-	SupportedClass = UWeaponDataAsset::StaticClass();
+	SupportedClass = UDH_WeaponDataAsset::StaticClass();
 }
 
 UObject* UWeaponDataFactory::FactoryCreateNew
@@ -19,5 +19,5 @@ UObject* UWeaponDataFactory::FactoryCreateNew
 	FName CallingContext
 )
 {
-	return NewObject<UWeaponDataAsset>(InParent, InClass, InName, Flags);
+	return NewObject<UDH_WeaponDataAsset>(InParent, InClass, InName, Flags);
 }

@@ -32,6 +32,7 @@ public class DHWeapon : ModuleRules
 				"AssetDefinition"
 			}
 		);
-        bUsePrecompiled = true;
+		// bPrecompile = true;
+  //       bUsePrecompiled = true;
 	}
 }

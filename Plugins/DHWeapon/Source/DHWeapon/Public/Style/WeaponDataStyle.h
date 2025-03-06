@@ -1,6 +1,9 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Components/ShapeComponent.h"
+#include "Engine/SCS_Node.h"
+#include "Engine/SimpleConstructionScript.h"
 
 class SUniformGridPanel;
 class IDetailLayoutBuilder;
@@ -77,6 +80,44 @@ namespace WeaponDAEditorHelper
 
 	TSharedRef<SBox> CreateSmallButton(
 		const FOnClicked & OnClickedDelegate,
-		FName IconName
+		FName IconName,
+		const FString & Tooltip = "" 
 	);
+
+	template <class T>
+	void GetNativeRootComponents(UClass * InClass, TArray<T*> & OutComponents)
+	{
+		OutComponents.Empty();
+		AActor * CDO = Cast<AActor>(InClass->GetDefaultObject());
+		if (CDO == nullptr)
+			return ;
+		CDO->GetComponents<T>(OutComponents);
+		int32 ArrayCount = OutComponents.Num();
+		for (int32 i = ArrayCount - 1; i >= 0; --i)
+		{
+			USceneComponent * Parent = OutComponents[i]->GetAttachParent();
+			if (Parent == nullptr || Parent->GetAttachParent() != nullptr)
+				OutComponents.RemoveAt(i);
+		}
+	}
+
+	template <class T>
+	void GetBlueprintRootComponents(UClass * InClass, TArray<T*> & OutComponents)
+	{
+		OutComponents.Empty();
+		UBlueprintGeneratedClass* BPGC = Cast<UBlueprintGeneratedClass>(InClass);
+		if (BPGC == nullptr)
+			return;
+		const TArray<USCS_Node*>& ActorBlueprintNodes = BPGC->SimpleConstructionScript->GetRootNodes();
+		for (USCS_Node* Node : ActorBlueprintNodes)
+		{
+			if (Node->ComponentClass->IsChildOf(T::StaticClass()))
+			{
+				if (T* Component = Cast<T>(Node->ComponentTemplate))
+				{
+					OutComponents.Add(Component);
+				}
+			}
+		}
+	}
 }

@@ -3,7 +3,7 @@
 #include "DetailWidgetRow.h"
 #include "IDetailChildrenBuilder.h"
 #include "IPropertyUtilities.h"
-#include "Data/ActionData.h"
+#include "Data/DH_ActionData.h"
 #include "Style/WeaponDataStyle.h"
 #include "Tab/Details/PropertyCustomization/DamageDataInfoDetails.h"
 #include "Widgets/Layout/SUniformGridPanel.h"
@@ -30,10 +30,10 @@ void FActionDataInfoDetails::CustomizeChildren
 )
 {
 	// ~Begin Set-up
-	TSharedRef<IPropertyHandle> CanMoveHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FActionData, bCanMoveOnAction)).ToSharedRef();
-	TSharedRef<IPropertyHandle> FixCameraHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FActionData, bFixCameraOnAction)).ToSharedRef();
-	TSharedRef<IPropertyHandle> MontageHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FActionData, ActionMontage)).ToSharedRef(); 
-	TSharedRef<IPropertyHandle> DamageDataHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FActionData, DamageData)).ToSharedRef(); 
+	TSharedRef<IPropertyHandle> CanMoveHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_ActionData, bCanMoveOnAction)).ToSharedRef();
+	TSharedRef<IPropertyHandle> FixCameraHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_ActionData, bFixCameraOnAction)).ToSharedRef();
+	TSharedRef<IPropertyHandle> MontageHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_ActionData, ActionMontage)).ToSharedRef(); 
+	TSharedRef<IPropertyHandle> DamageDataHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_ActionData, DamageData)).ToSharedRef(); 
 
 	bool bCanMoveOnAction;
 	bool bShouldFixCameraOnAction;
@@ -52,7 +52,7 @@ void FActionDataInfoDetails::CustomizeChildren
 	TSharedRef<SVerticalBox> DamageDataVBox = SNew(SVerticalBox);
 	DamageDataVBox->AddSlot().VAlign(VAlign_Center).MaxHeight(30) // 요소 추가 버튼.
 	[
-		SNew(SBox).MinDesiredHeight(30).MaxDesiredHeight(30)
+		SNew(SBox).MinDesiredHeight(30).MaxDesiredHeight(30).HAlign(HAlign_Fill).MinDesiredWidth(650)
 		[
 			DamageDataHandle->CreatePropertyValueWidget()
 		]
@@ -60,16 +60,92 @@ void FActionDataInfoDetails::CustomizeChildren
 	for (uint32 i = 0; i < DamageDataNum; i++)
 	{
 		TSharedRef<IPropertyHandle> ElementHandle = DamageDataHandle->GetChildHandle(i).ToSharedRef();
+
+		FOnClicked OnDeleteItemClicked = FOnClicked::CreateLambda([DamageDataHandle, ElementHandle]()->FReply {
+			if (ElementHandle->IsValidHandle() == false)
+			{
+				GLog->Log("Element Property Not Valid");
+				return FReply::Unhandled();
+			}
+			TSharedPtr<IPropertyHandleArray> ArrayProperty = DamageDataHandle->AsArray();
+			if (ArrayProperty.IsValid() == false)
+			{
+				GLog->Log("Property is NOT Array");
+				return FReply::Unhandled();
+			}
+			const uint32 Index = ElementHandle->GetIndexInArray();
+			uint32 ArraySize;
+			ArrayProperty->GetNumElements(ArraySize);
+			if (ArraySize <= Index)
+			{
+				GLog->Log("Index Not Valid");
+				return FReply::Unhandled();;
+			}
+			ArrayProperty->DeleteItem(Index);
+			return FReply::Handled();
+		});
+		
 		DamageDataVBox->AddSlot().AutoHeight().VAlign(VAlign_Center)
 		[
 			SNew(SSplitter).Orientation(Orient_Horizontal)
 		];
 		DamageDataVBox->AddSlot().AutoHeight().VAlign(VAlign_Center)
 		[
-			SDamageData(ElementHandle, CustomizationUtils)
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).HAlign(HAlign_Left)	
+			[
+				SDamageData(ElementHandle, CustomizationUtils)
+			]
+			+ SHorizontalBox::Slot().VAlign(VAlign_Fill).AutoWidth().Padding(0,5) [
+				SNew(SBorder).BorderImage(FWeaponDataStyle::GetDamageDataBackGroundColor()).Padding(0).VAlign(VAlign_Top)
+				[
+					WeaponDAEditorHelper::CreateSmallButton(OnDeleteItemClicked, "Icons.X", "Delete Damage Data")
+				]
+			]
 		];
 	}
 	// ~End Damage Data
+
+	// ~Begin Action Data
+	bool bIsArrayElement = PropertyHandle->GetParentHandle().ToSharedRef()->AsArray().IsValid();
+	FOnClicked OnDeleteActionDataClicked = FOnClicked::CreateLambda([PropertyHandle]()->FReply {
+		if (PropertyHandle->IsValidHandle() == false)
+		{
+			GLog->Log("Element Property Not Valid");
+			return FReply::Unhandled();
+		}
+		TSharedPtr<IPropertyHandle> ParentHandle = PropertyHandle->GetParentHandle();
+		if (ParentHandle.IsValid() == false)
+		{
+			GLog->Log("Parent Property Not Valid");
+			return FReply::Unhandled();
+		}
+		TSharedPtr<IPropertyHandleArray> ArrayProperty = ParentHandle->AsArray();
+		if (ArrayProperty.IsValid() == false)
+		{
+			GLog->Log("Property is NOT Array");
+			return FReply::Unhandled();
+		}
+		uint32 Index = PropertyHandle->GetIndexInArray();
+		uint32 Size;
+		ArrayProperty->GetNumElements(Size);
+		GLog->Log(FString::Printf(L"Deleting : %d/%d", Index, Size));
+		ArrayProperty.ToSharedRef()->DeleteItem(Index);
+		return FReply::Handled();
+	});
+	TSharedRef<SHorizontalBox> ActionData = SNew(SHorizontalBox);
+	ActionData->AddSlot().AutoWidth().VAlign(VAlign_Center).HAlign(HAlign_Left)
+	[
+		DamageDataVBox
+	];
+	if (bIsArrayElement)
+	{
+		ActionData->AddSlot().VAlign(VAlign_Top).AutoWidth().Padding(0,5)
+		[
+			WeaponDAEditorHelper::CreateSmallButton(OnDeleteActionDataClicked, "Icons.X", "Delete Action Data")
+		];
+	}
+	// ~End Action Data
 	
 	ChildBuilder.AddCustomRow(FText::FromString("Montage Section"))
 	BEGIN_BORDER_NAMECONTENT(FWeaponDataStyle::GetActionDataBackGroundColor())
@@ -78,7 +154,7 @@ void FActionDataInfoDetails::CustomizeChildren
 		+ SVerticalBox::Slot()
 		.VAlign(VAlign_Center).HAlign(HAlign_Fill).AutoHeight()
 		[
-			MontageHandle->CreatePropertyValueWidget()
+			MontageHandle->CreatePropertyValueWidget(true)
 		]
 		+ SVerticalBox::Slot()
 		.VAlign(VAlign_Center).HAlign(HAlign_Left).AutoHeight()
@@ -106,10 +182,9 @@ void FActionDataInfoDetails::CustomizeChildren
 		]
 	]
 	END_BORDER_NAMECONTENT
-	BEGIN_BORDER_VALUECONTENT(FWeaponDataStyle::GetActionDataBackGroundColor())
-	.VAlign(VAlign_Top)
+	BEGIN_BORDER_VALUECONTENT(FWeaponDataStyle::GetActionDataBackGroundColor()).VAlign(VAlign_Top)
 	[
-		DamageDataVBox
+		ActionData
 	]
 	END_BORDER_VALUECONTENT;
 }
@@ -126,11 +201,11 @@ TSharedRef<SWidget> FActionDataInfoDetails::SDamageData
 	bool bUseEffect;
 	bool bUseCameraShake;
 
-	const TSharedRef<IPropertyHandle> FinisherHandle = ElementHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, bIsFinisher)).ToSharedRef();
-	const TSharedRef<IPropertyHandle> UseLaunchHandle = ElementHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, bUseLaunch)).ToSharedRef();
-	const TSharedRef<IPropertyHandle> UseSoundHandle = ElementHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, bUseSound)).ToSharedRef();
-	const TSharedRef<IPropertyHandle> UseEffectHandle = ElementHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, bUseEffect)).ToSharedRef();
-	const TSharedRef<IPropertyHandle> UseCameraShakeHandle = ElementHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDamageData, bUseCameraShake)).ToSharedRef();
+	const TSharedRef<IPropertyHandle> FinisherHandle = ElementHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, bIsFinisher)).ToSharedRef();
+	const TSharedRef<IPropertyHandle> UseLaunchHandle = ElementHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, bUseLaunch)).ToSharedRef();
+	const TSharedRef<IPropertyHandle> UseSoundHandle = ElementHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, bUseSound)).ToSharedRef();
+	const TSharedRef<IPropertyHandle> UseEffectHandle = ElementHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, bUseEffect)).ToSharedRef();
+	const TSharedRef<IPropertyHandle> UseCameraShakeHandle = ElementHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, bUseCameraShake)).ToSharedRef();
 
 	FinisherHandle->GetValue(bIsFinisher);
 	UseLaunchHandle->GetValue(bUseLaunch);
@@ -152,7 +227,6 @@ TSharedRef<SWidget> FActionDataInfoDetails::SDamageData
 				FDamageDataInfoDetails::DamageValueContent(ElementHandle)
 			]
 		];
-		
 	}
 	if (bUseLaunch == true)
 	{
@@ -234,7 +308,7 @@ TSharedRef<SWidget> FActionDataInfoDetails::SDamageData
 			]
 			.BodyContent()
 			[
-				SNew(SBox).Padding(5).VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+				SNew(SBox).Padding(5).VAlign(VAlign_Fill).HAlign(HAlign_Fill).MinDesiredWidth(600)
 				[
 					DamageDataBox
 				]

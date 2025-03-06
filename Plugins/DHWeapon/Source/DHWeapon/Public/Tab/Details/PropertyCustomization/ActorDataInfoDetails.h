@@ -21,19 +21,4 @@ public:
 		IDetailChildrenBuilder & ChildBuilder,
 		IPropertyTypeCustomizationUtils & CustomizationUtils
 	) override;
-
-private:
-	static void MeshSection
-	(
-		TSharedRef<IPropertyHandle> PropertyHandle,
-		IDetailChildrenBuilder & ChildBuilder,
-		IPropertyTypeCustomizationUtils & CustomizationUtils
-	);
-
-	void ColliderSection
-	(
-		TSharedRef<IPropertyHandle> PropertyHandle,
-		IDetailChildrenBuilder & ChildBuilder,
-		IPropertyTypeCustomizationUtils & CustomizationUtils
-	);
 };

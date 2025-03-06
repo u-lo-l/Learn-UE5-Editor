@@ -5,9 +5,9 @@
 #include "ContentBrowserDelegates.h"
 
 struct FAssetPickerConfig;
-class UWeaponDataAsset;
+class UDH_WeaponDataAsset;
 
-DECLARE_DELEGATE_OneParam(FOnOpenNewWeapoDataAsset, UWeaponDataAsset*);
+DECLARE_DELEGATE_OneParam(FOnOpenNewWeapoDataAsset, UDH_WeaponDataAsset*);
 
 class DHWEAPON_API SWeaponDataBrowser final : public SCompoundWidget
 {
@@ -24,7 +24,7 @@ public:
 	void OnRequestOpenAsset(const FAssetData& AssetData);
 
 	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
-	void SelectAsset( const UWeaponDataAsset* InAsset);
+	void SelectAsset( const UDH_WeaponDataAsset* InAsset);
 
 	FOnOpenNewWeapoDataAsset OnOpenNewAsset;
 private:

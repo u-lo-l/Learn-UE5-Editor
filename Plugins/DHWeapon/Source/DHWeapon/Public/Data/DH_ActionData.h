@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "DamageData.h"
-#include "ActionData.generated.h"
+#include "DH_DamageData.h"
+#include "DH_ActionData.generated.h"
 
 USTRUCT()
-struct FActionData
+struct FDH_ActionData
 {
 	GENERATED_BODY()
 	
@@ -17,5 +17,5 @@ struct FActionData
 	bool bFixCameraOnAction = false;
 
 	UPROPERTY(EditAnywhere, Category = "Damage Datas")
-	TArray<FDamageData> DamageData;
+	TArray<FDH_DamageData> DamageData;
 };

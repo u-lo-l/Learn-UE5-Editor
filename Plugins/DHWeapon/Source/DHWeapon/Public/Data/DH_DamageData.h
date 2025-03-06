@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "DamageData.generated.h"
+#include "DH_DamageData.generated.h"
 
 class UFXSystemAsset;
 
 USTRUCT()
-struct FDamageData
+struct FDH_DamageData
 {
 	GENERATED_BODY()
 

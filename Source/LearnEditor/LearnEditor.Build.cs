@@ -10,7 +10,7 @@ public class LearnEditor : ModuleRules
 		
 		PrivateIncludePaths.Add(ModuleDirectory);
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "DHWeapon" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore", "LearnExtender" });
 	}

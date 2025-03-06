@@ -2,7 +2,7 @@
 
 #include "Editor/WeaponDataEditor.h"
 
-#include "Data/WeaponDataAsset.h"
+#include "Data/DH_WeaponDataAsset.h"
 #include "Tab/Browser/SWeaponDataBrowser.h"
 
 const FName FWeaponDataEditor::EditorName = FName("WeaponDataEditor");
@@ -103,12 +103,12 @@ FName FWeaponDataEditor::GetEditorName() const
 void FWeaponDataEditor::FocusWindow( UObject * ObjectToFocusOn )
 {
 	FAssetEditorToolkit::FocusWindow(ObjectToFocusOn);
-	CurrentEditingAsset = Cast<UWeaponDataAsset>(ObjectToFocusOn);
+	CurrentEditingAsset = Cast<UDH_WeaponDataAsset>(ObjectToFocusOn);
 	BrowserTab->SelectAsset(CurrentEditingAsset);
 	DetailsTab->SetObject(CurrentEditingAsset);
 }
 
-void FWeaponDataEditor::OpenMyAssetEditor(UWeaponDataAsset * InAsset)
+void FWeaponDataEditor::OpenMyAssetEditor(UDH_WeaponDataAsset * InAsset)
 {
 	GLog->Logf(L"Opening FWeaponDataEditor : %s", *InAsset->GetName()); // 한 번 출력되는거 확인함.
 	ensureMsgf(InAsset != nullptr, L"Asset Not Valid");
@@ -143,7 +143,7 @@ TSharedRef<SDockTab> FWeaponDataEditor::OnSpawnDetailTab( const FSpawnTabArgs & 
 	];
 }
 
-void FWeaponDataEditor::OnOpenNewAsset( UWeaponDataAsset * InAsset )
+void FWeaponDataEditor::OnOpenNewAsset( UDH_WeaponDataAsset * InAsset )
 {
 	GLog->Logf(L"Opening FWeaponDataEditor : %s", *InAsset->GetName());
 	CurrentEditingAsset = InAsset;

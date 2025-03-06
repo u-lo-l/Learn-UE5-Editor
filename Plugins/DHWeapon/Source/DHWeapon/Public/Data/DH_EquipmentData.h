@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "EquipmentData.generated.h"
+#include "DH_EquipmentData.generated.h"
 
 USTRUCT()
-struct FEquipmentData
+struct FDH_EquipmentData
 {
 	GENERATED_BODY()
 	

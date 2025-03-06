@@ -3,7 +3,7 @@
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
 #include "SlateOptMacros.h"
-#include "Data/WeaponDataAsset.h"
+#include "Data/DH_WeaponDataAsset.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -29,14 +29,14 @@ void SWeaponDataBrowser::OnRequestOpenAssets( const TArray<FAssetData> & Selecte
 {
 	if (SelectedAssets.IsEmpty() == true)
 		return ;
-	UWeaponDataAsset * SelectedAsset = Cast<UWeaponDataAsset>(SelectedAssets[0].GetAsset());
+	UDH_WeaponDataAsset * SelectedAsset = Cast<UDH_WeaponDataAsset>(SelectedAssets[0].GetAsset());
 	
 	OnOpenNewAsset.ExecuteIfBound(SelectedAsset);
 }
 
 void SWeaponDataBrowser::OnRequestOpenAsset( const FAssetData & AssetData)
 {
-	UWeaponDataAsset * SelectedAsset = Cast<UWeaponDataAsset>(AssetData.GetAsset());
+	UDH_WeaponDataAsset * SelectedAsset = Cast<UDH_WeaponDataAsset>(AssetData.GetAsset());
 	OnOpenNewAsset.ExecuteIfBound(SelectedAsset);
 }
 
@@ -45,7 +45,7 @@ FReply SWeaponDataBrowser::OnKeyDown( const FGeometry & MyGeometry, const FKeyEv
 	return SCompoundWidget::OnKeyDown(MyGeometry, InKeyEvent);
 }
 
-void SWeaponDataBrowser::SelectAsset( const UWeaponDataAsset * InAsset )
+void SWeaponDataBrowser::SelectAsset( const UDH_WeaponDataAsset * InAsset )
 {
 	GLog->Log("TODO : SelectAsset");
 	// FAssetData AssetData(InAsset);
@@ -69,7 +69,7 @@ FAssetPickerConfig SWeaponDataBrowser::CreateAssetPickerConfig()
 	FAssetPickerConfig Config;
 
 	Config.Filter.bRecursivePaths = true;
-	Config.Filter.ClassPaths.Add(UWeaponDataAsset::StaticClass()->GetClassPathName());
+	Config.Filter.ClassPaths.Add(UDH_WeaponDataAsset::StaticClass()->GetClassPathName());
 
 	Config.InitialAssetViewType = EAssetViewType::Column;
 	Config.bAddFilterUI = true;
@@ -104,7 +104,7 @@ FAssetPickerConfig SWeaponDataBrowser::CreateAssetPickerConfig()
 	// Config.SaveSettingsName = SettingsIniSection;
 	
 	TArray<UObject::FAssetRegistryTag> AssetRegistryTags;
-	UWeaponDataAsset::StaticClass()->GetDefaultObject()->GetAssetRegistryTags(AssetRegistryTags);
+	UDH_WeaponDataAsset::StaticClass()->GetDefaultObject()->GetAssetRegistryTags(AssetRegistryTags);
 	for(UObject::FAssetRegistryTag& AssetRegistryTag : AssetRegistryTags)
 	{
 		Config.HiddenColumnNames.Add(AssetRegistryTag.Name.ToString());
