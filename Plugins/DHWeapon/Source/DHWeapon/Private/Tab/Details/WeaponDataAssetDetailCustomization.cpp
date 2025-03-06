@@ -24,8 +24,6 @@ FSimpleDelegate FWeaponDataAssetDetailCustomization::OnPropertyChanged( IDetailL
 	});
 }
 
-
-
 TSharedRef<IDetailCustomization> FWeaponDataAssetDetailCustomization::MakeInstance()
 {
 	return MakeShareable(new FWeaponDataAssetDetailCustomization());
@@ -65,8 +63,12 @@ void FWeaponDataAssetDetailCustomization::CustomizeDetails( IDetailLayoutBuilder
 	DetailBuilder.HideProperty(AirActionHandle);
 #pragma endregion Get Handles
 	
-	IDetailCategoryBuilder& WeaponActorDataCategory = DetailBuilder.EditCategory("WeaponActorData", FText::FromString("Weapon Actor Data"));
-	
+	IDetailCategoryBuilder & MovementDataCategory = DetailBuilder.EditCategory("Movement", FText::FromString("Movement"));
+	IDetailCategoryBuilder& WeaponActorDataCategory = DetailBuilder.EditCategory("Weapon", FText::FromString("Weapon Actor"));
+	IDetailCategoryBuilder & HitDataCategory = DetailBuilder.EditCategory("Hit", FText::FromString("Hit"));
+
+	MovementDataCategory.AddCustomRow(FText::FromString("TODO Movement"))
+	.NameContent() [ SNew(STextBlock).Text(FText::FromString("TODO"))];
 	// Weapon Actor 섹션
 	CreateActorCategory(WeaponActorDataCategory, DetailBuilder, ActorHandle, ActorDataHandle,"Weapon Actor");
 	
@@ -78,6 +80,9 @@ void FWeaponDataAssetDetailCustomization::CustomizeDetails( IDetailLayoutBuilder
 	CreateActionCategory(WeaponActorDataCategory, DetailBuilder, GuardActionClassHandle, GuardActionHandle, "GuardActions");
 	CreateActionCategory(WeaponActorDataCategory, DetailBuilder, FinisherActionClassHandle, FinisherActionHandle, "FinisherActions");
 	CreateActionCategory(WeaponActorDataCategory, DetailBuilder, AirActionClassHandle, AirActionHandle, "AirActions");
+
+	HitDataCategory.AddCustomRow(FText::FromString("TODO Damage"))
+	.NameContent() [ SNew(STextBlock).Text(FText::FromString("TODO"))];
 }
 
 void FWeaponDataAssetDetailCustomization::CreateActorCategory
@@ -370,27 +375,32 @@ TSharedRef<SVerticalBox> FWeaponDataAssetDetailCustomization::CreateActorInfo
 	}
 
 	TSharedPtr<IPropertyHandle> MeshPropertyHandle = InActorDataHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_WeaponActorData, MeshNames));
-	TSharedPtr<IPropertyHandle> MeshSocketPropertyHandle = InActorDataHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_WeaponActorData, MeshSocketNames));
+	TSharedPtr<IPropertyHandle> MeshUnequipSocketPropertyHandle = InActorDataHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_WeaponActorData, MeshUnequipSocketNames));
+	TSharedPtr<IPropertyHandle> MeshEquipSocketPropertyHandle = InActorDataHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_WeaponActorData, MeshEquipSocketNames));
+
 	TSharedRef<IPropertyHandleArray> MeshArrayHandle = MeshPropertyHandle->AsArray().ToSharedRef();
-	TSharedRef<IPropertyHandleArray> MeshSocketArrayHandle = MeshSocketPropertyHandle->AsArray().ToSharedRef();
-	FindRootMeshComponents(SelectedClass, MeshArrayHandle, MeshSocketArrayHandle);
-	AddRootMeshesSlate(ActorDetailInfoBox, MeshArrayHandle, MeshSocketArrayHandle);
+	TSharedRef<IPropertyHandleArray> MeshUnequipSocketArrayHandle = MeshUnequipSocketPropertyHandle->AsArray().ToSharedRef();
+	TSharedRef<IPropertyHandleArray> MeshEquipSocketArrayHandle = MeshEquipSocketPropertyHandle->AsArray().ToSharedRef();
+	
+	FindDefaultRootMeshComponentsFromClass(SelectedClass, MeshArrayHandle, MeshUnequipSocketArrayHandle, MeshEquipSocketArrayHandle);
+	AddRootMeshesSlateToVerticalBox(ActorDetailInfoBox, MeshArrayHandle, MeshUnequipSocketArrayHandle, MeshEquipSocketArrayHandle);
 
 	TSharedPtr<IPropertyHandle> ColliderPropertyHandle = InActorDataHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_WeaponActorData, ColliderNames));
 	TSharedPtr<IPropertyHandle> ColliderSocketPropertyHandle = InActorDataHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_WeaponActorData, ColliderSocketNames));
 	TSharedRef<IPropertyHandleArray> ColliderArrayHandle = ColliderPropertyHandle->AsArray().ToSharedRef();
 	TSharedRef<IPropertyHandleArray> ColliderSocketArrayHandle = ColliderSocketPropertyHandle->AsArray().ToSharedRef();
-	FindRootColliderComponents(SelectedClass, ColliderArrayHandle, ColliderSocketArrayHandle);
-	AddRootCollidersSlate(ActorDetailInfoBox, ColliderArrayHandle, ColliderSocketArrayHandle);
+	FindDefaultRootColliderComponentsFromClass(SelectedClass, ColliderArrayHandle, ColliderSocketArrayHandle);
+	AddRootCollidersSlateToVerticalBox(ActorDetailInfoBox, ColliderArrayHandle, ColliderSocketArrayHandle);
 
 	return ActorDetailInfoBox;
 }
 
-void FWeaponDataAssetDetailCustomization::FindRootMeshComponents
+void FWeaponDataAssetDetailCustomization::FindDefaultRootMeshComponentsFromClass
 (
 	UClass * InClass,
 	const TSharedRef<IPropertyHandleArray> & InMeshArrayHandle,
-	const TSharedRef<IPropertyHandleArray> & InMeshDataArrayHandle
+	const TSharedRef<IPropertyHandleArray> & InMeshUnequipSocketArrayHandle,
+	const TSharedRef<IPropertyHandleArray> & InMeshEquipSocketArrayHandle
 )
 {
 	if (InClass == nullptr)
@@ -405,60 +415,90 @@ void FWeaponDataAssetDetailCustomization::FindRootMeshComponents
 	for (const UMeshComponent * Mesh : NativeMeshComponents)
 		MeshComponentNamesTable.Add(Mesh->GetFName());
 	for (const UMeshComponent * Mesh : BlueprintMeshComponents)
-		MeshComponentNamesTable.Add(Mesh->GetFName());
+	{
+		FString MeshName = Mesh->GetFName().ToString().Replace(TEXT("_GEN_VARIABLE"), TEXT(""));
+		MeshComponentNamesTable.Add(FName(MeshName));
+	}
 	
 	uint32 MeshesSize = 0;
-	uint32 MeshSocketsSize = 0;
+	uint32 MeshUnequipSocketsSize = 0;
+	uint32 MeshEquipSocketsSize = 0;
+	
 	InMeshArrayHandle->GetNumElements(MeshesSize);
-	InMeshDataArrayHandle->GetNumElements(MeshSocketsSize);
-	if (MeshesSize != MeshSocketsSize)
+	InMeshUnequipSocketArrayHandle->GetNumElements(MeshUnequipSocketsSize);
+	InMeshEquipSocketArrayHandle->GetNumElements(MeshEquipSocketsSize);
+	if (MeshesSize != MeshUnequipSocketsSize || MeshEquipSocketsSize != MeshesSize)
 	{
 		InMeshArrayHandle->EmptyArray();
-		InMeshDataArrayHandle->EmptyArray();
+		InMeshUnequipSocketArrayHandle->EmptyArray();
+		InMeshEquipSocketArrayHandle->EmptyArray();
+		
+		MeshesSize = 0;
+		MeshUnequipSocketsSize = 0;
+		MeshEquipSocketsSize = 0;
 	}
 
 	TSet<FName> SavedMeshNames;
-	for (int32 i = MeshesSize - 1 ; i >= 0; i--)
+	for (int32 i = MeshesSize - 1; i >= 0 ; i--)
 	{
 		FName MeshName;
 		InMeshArrayHandle->GetElement(i)->GetValue(MeshName);
-		if (MeshComponentNamesTable.Contains(MeshName) == false)
-			InMeshArrayHandle->DeleteItem(i);
-		else
+		if (MeshComponentNamesTable.Contains(MeshName) == true)
 			SavedMeshNames.Add(MeshName);
+		else
+		{
+			InMeshArrayHandle->DeleteItem(i);
+			InMeshUnequipSocketArrayHandle->DeleteItem(i);
+			InMeshEquipSocketArrayHandle->DeleteItem(i);
+		}
 	}
 		
 	for (const FName & MeshFName : MeshComponentNamesTable)
 	{
-		FString MeshName = MeshFName.ToString().Replace(TEXT("_GEN_VARIABLE"), TEXT(""));
-		if (SavedMeshNames.Contains(FName(MeshName)) == true)
+		if (SavedMeshNames.Contains(MeshFName) == true)
 			continue;
 		uint32 AppendedIndex = 0;
 		InMeshArrayHandle->GetNumElements(AppendedIndex);
+
 		InMeshArrayHandle->AddItem();
-		InMeshDataArrayHandle->AddItem();
-		InMeshArrayHandle->GetElement(AppendedIndex)->SetValue(FName(MeshName));
-		InMeshDataArrayHandle->GetElement(AppendedIndex)->SetValue(NAME_None);
+		InMeshUnequipSocketArrayHandle->AddItem();
+		InMeshEquipSocketArrayHandle->AddItem();
+		
+		InMeshArrayHandle->GetElement(AppendedIndex)->SetValue(MeshFName);
+		InMeshUnequipSocketArrayHandle->GetElement(AppendedIndex)->SetValue(NAME_None);
+		InMeshEquipSocketArrayHandle->GetElement(AppendedIndex)->SetValue(NAME_None);
+		
+		InMeshArrayHandle->GetNumElements(MeshesSize);
+		InMeshUnequipSocketArrayHandle->GetNumElements(MeshUnequipSocketsSize);
+		InMeshEquipSocketArrayHandle->GetNumElements(MeshEquipSocketsSize);
 	}
 }
 
-void FWeaponDataAssetDetailCustomization::AddRootMeshesSlate
+void FWeaponDataAssetDetailCustomization::AddRootMeshesSlateToVerticalBox
 (
 	const TSharedRef<SVerticalBox> & InVerticalBox,
 	const TSharedRef<IPropertyHandleArray> & InMeshArrayHandle,
-	const TSharedRef<IPropertyHandleArray> & InMeshDataArrayHandle
+	const TSharedRef<IPropertyHandleArray> & InMeshUnequipSocketArrayHandle,
+	const TSharedRef<IPropertyHandleArray> & InMeshEquipSocketArrayHandle
 )
 {
 	uint32 MeshesSize;
-	uint32 MeshSocketsSize;
+	uint32 MeshUnequipSocketsSize;
+	uint32 MeshEquipSocketsSize;
+	
 	InMeshArrayHandle->GetNumElements(MeshesSize);
-	InMeshDataArrayHandle->GetNumElements(MeshSocketsSize);
-	if (MeshSocketsSize != MeshesSize)
+	InMeshUnequipSocketArrayHandle->GetNumElements(MeshUnequipSocketsSize);
+	InMeshEquipSocketArrayHandle->GetNumElements(MeshEquipSocketsSize);
+	
+	if (MeshUnequipSocketsSize != MeshesSize || MeshEquipSocketsSize != MeshesSize)
 	{
 		InMeshArrayHandle->EmptyArray();
-		InMeshDataArrayHandle->EmptyArray();
+		InMeshUnequipSocketArrayHandle->EmptyArray();
+		InMeshEquipSocketArrayHandle->EmptyArray();
+		
 		MeshesSize = 0;
-		MeshSocketsSize = 0;
+		MeshUnequipSocketsSize = 0;
+		MeshEquipSocketsSize = 0;
 	}
 	if (MeshesSize == 0)
 		return ;
@@ -467,7 +507,7 @@ void FWeaponDataAssetDetailCustomization::AddRootMeshesSlate
 	[
 		SNew(SSeparator).Orientation(Orient_Horizontal)
 	];
-	InVerticalBox->AddSlot().HAlign(HAlign_Fill).AutoHeight().VAlign(VAlign_Center)
+	InVerticalBox->AddSlot().HAlign(HAlign_Left).AutoHeight().VAlign(VAlign_Center)
 	[
 		SNew(SHorizontalBox) + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0) [
 			SNew(SBox).MinDesiredWidth(200).MaxDesiredWidth(200).HAlign(HAlign_Center).VAlign(VAlign_Bottom).Padding(0,2.5f) [
@@ -477,7 +517,13 @@ void FWeaponDataAssetDetailCustomization::AddRootMeshesSlate
 			SNew(SSeparator).Orientation(Orient_Vertical).Thickness(0.5f)
 		] + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0) [
 			SNew(SBox).MinDesiredWidth(200).MaxDesiredWidth(200).HAlign(HAlign_Center).VAlign(VAlign_Bottom).Padding(0,2.5f) [
-				SNew(STextBlock).Text(FText::FromString("Socket Name")).Font(GetBoldFont(7.5f))
+				SNew(STextBlock).Text(FText::FromString("Unequip Socket Name")).Font(GetBoldFont(7.5f))
+			]
+		] + SHorizontalBox::Slot().Padding(0).HAlign(HAlign_Center).VAlign(VAlign_Fill).FillWidth(1.0f) [
+			SNew(SSeparator).Orientation(Orient_Vertical).Thickness(0.5f)
+		] + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0) [
+			SNew(SBox).MinDesiredWidth(200).MaxDesiredWidth(200).HAlign(HAlign_Center).VAlign(VAlign_Bottom).Padding(0,2.5f) [
+				SNew(STextBlock).Text(FText::FromString("Equip Socket Name")).Font(GetBoldFont(7.5f))
 			]
 		]
 	];
@@ -487,7 +533,7 @@ void FWeaponDataAssetDetailCustomization::AddRootMeshesSlate
 	];
 	for (uint32 i = 0 ;i < MeshesSize; i++)
 	{
-		InVerticalBox->AddSlot().HAlign(HAlign_Fill).AutoHeight().Padding(0)
+		InVerticalBox->AddSlot().HAlign(HAlign_Left).AutoHeight().Padding(0)
 		[
 			SNew(SHorizontalBox) + SHorizontalBox::Slot().AutoWidth().Padding(0) [
 				SNew(SBox).IsEnabled(false).MinDesiredWidth(200).MaxDesiredWidth(200).HAlign(HAlign_Fill).Padding(5,2.5f) [
@@ -497,7 +543,13 @@ void FWeaponDataAssetDetailCustomization::AddRootMeshesSlate
 				SNew(SSeparator).Orientation(Orient_Vertical).Thickness(0.5f)
 			]  + SHorizontalBox::Slot().AutoWidth().Padding(0) [
 				SNew(SBox).MinDesiredWidth(200).MaxDesiredWidth(200).HAlign(HAlign_Fill).Padding(5,2.5f) [
-					InMeshDataArrayHandle->GetElement(i)->CreatePropertyValueWidget(false)
+					InMeshUnequipSocketArrayHandle->GetElement(i)->CreatePropertyValueWidget(false)
+				]
+			] + SHorizontalBox::Slot().Padding( 0).HAlign(HAlign_Center).VAlign(VAlign_Fill).FillWidth(1.0f) [
+				SNew(SSeparator).Orientation(Orient_Vertical).Thickness(0.5f)
+			]  + SHorizontalBox::Slot().AutoWidth().Padding(0) [
+				SNew(SBox).MinDesiredWidth(200).MaxDesiredWidth(200).HAlign(HAlign_Fill).Padding(5,2.5f) [
+					InMeshEquipSocketArrayHandle->GetElement(i)->CreatePropertyValueWidget(false)
 				]
 			]
 		];
@@ -508,7 +560,7 @@ void FWeaponDataAssetDetailCustomization::AddRootMeshesSlate
 	];
 }
 
-void FWeaponDataAssetDetailCustomization::FindRootColliderComponents
+void FWeaponDataAssetDetailCustomization::FindDefaultRootColliderComponentsFromClass
 (
 		UClass * InClass,
 		const TSharedRef<IPropertyHandleArray> & InColliderArrayHandle,
@@ -528,44 +580,54 @@ void FWeaponDataAssetDetailCustomization::FindRootColliderComponents
 	for (UShapeComponent * Shape : NativeShapeComponents)
 		ColliderComponentNamesTable.Add(Shape->GetFName());
 	for (UShapeComponent * Shape : BlueprintShapeComponents)
-		ColliderComponentNamesTable.Add(Shape->GetFName());
+	{
+		FString ColliderName = Shape->GetFName().ToString().Replace(TEXT("_GEN_VARIABLE"), TEXT(""));
+		ColliderComponentNamesTable.Add(FName(ColliderName));
+	}
 	
-	uint32 MeshesSize = 0;
-	uint32 MeshSocketsSize = 0;
-	InColliderArrayHandle->GetNumElements(MeshesSize);
-	InColliderDataArrayHandle->GetNumElements(MeshSocketsSize);
-	if (MeshesSize != MeshSocketsSize)
+	uint32 CollidersSize = 0;
+	uint32 ColliderSocketsSize = 0;
+	InColliderArrayHandle->GetNumElements(CollidersSize);
+	InColliderDataArrayHandle->GetNumElements(ColliderSocketsSize);
+	if (CollidersSize != ColliderSocketsSize)
 	{
 		InColliderArrayHandle->EmptyArray();
 		InColliderDataArrayHandle->EmptyArray();
 	}
 
-	TSet<FName> SavedMeshNames;
-	for (int32 i = MeshesSize - 1 ; i >= 0; i--)
+	TSet<FName> SavedColliderNames; // 기존 DataAsset에 저장된 데이터.
+	for (int32 i = CollidersSize - 1 ; i >= 0 ; i--)
 	{
-		FName MeshName;
-		InColliderArrayHandle->GetElement(i)->GetValue(MeshName);
-		if (ColliderComponentNamesTable.Contains(MeshName) == false)
-			InColliderArrayHandle->DeleteItem(i);
+		FName ColliderName;
+		InColliderArrayHandle->GetElement(i)->GetValue(ColliderName);
+		if (ColliderComponentNamesTable.Contains(ColliderName) == true)
+			SavedColliderNames.Add(ColliderName);
 		else
-			SavedMeshNames.Add(MeshName);
+		{
+			InColliderArrayHandle->DeleteItem(i);
+			InColliderDataArrayHandle->DeleteItem(i);
+		}
 	}
+
+	// 새로 읽은 정보 중 기존에 없던 데이터만 추가
 	for (const FName & ColliderFName : ColliderComponentNamesTable)
 	{
-		FString ColliderName = ColliderFName.ToString().Replace(TEXT("_GEN_VARIABLE"), TEXT(""));
-		if (SavedMeshNames.Contains(FName(ColliderName)) == true)
+		if (SavedColliderNames.Contains(ColliderFName) == true)
 			continue;
+		
 		uint32 AppendedIndex = 0;
 		InColliderArrayHandle->GetNumElements(AppendedIndex);
+
 		InColliderArrayHandle->AddItem();
 		InColliderDataArrayHandle->AddItem();
-		InColliderArrayHandle->GetElement(AppendedIndex)->SetValue(FName(ColliderName));
+		
+		InColliderArrayHandle->GetElement(AppendedIndex)->SetValue(ColliderFName);
 		InColliderDataArrayHandle->GetElement(AppendedIndex)->SetValue(NAME_None);
 	}
 }
 
 
-void FWeaponDataAssetDetailCustomization::AddRootCollidersSlate
+void FWeaponDataAssetDetailCustomization::AddRootCollidersSlateToVerticalBox
 (
 	const TSharedRef<SVerticalBox> & InVerticalBox,
 	const TSharedRef<IPropertyHandleArray> & InColliderArrayHandle,
@@ -591,7 +653,7 @@ void FWeaponDataAssetDetailCustomization::AddRootCollidersSlate
 	[
 		SNew(SSeparator).Orientation(Orient_Horizontal)
 	];
-	InVerticalBox->AddSlot().HAlign(HAlign_Fill).AutoHeight().VAlign(VAlign_Center)
+	InVerticalBox->AddSlot().HAlign(HAlign_Left).AutoHeight().VAlign(VAlign_Center)
 	[
 		SNew(SHorizontalBox) + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0) [
 			SNew(SBox).MinDesiredWidth(200).MaxDesiredWidth(200).HAlign(HAlign_Center).VAlign(VAlign_Bottom).Padding(0,2.5f) [
@@ -611,7 +673,7 @@ void FWeaponDataAssetDetailCustomization::AddRootCollidersSlate
 	];
 	for (uint32 i = 0 ;i < CollidersSize; i++)
 	{
-		InVerticalBox->AddSlot().HAlign(HAlign_Fill).AutoHeight().Padding(0)
+		InVerticalBox->AddSlot().HAlign(HAlign_Left).AutoHeight().Padding(0)
 		[
 			SNew(SHorizontalBox) + SHorizontalBox::Slot().AutoWidth().Padding(0) [
 				SNew(SBox).IsEnabled(false).MinDesiredWidth(200).MaxDesiredWidth(200).HAlign(HAlign_Fill).Padding(5,2.5f) [

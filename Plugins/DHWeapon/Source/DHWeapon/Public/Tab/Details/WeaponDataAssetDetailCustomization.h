@@ -47,26 +47,27 @@ private:
 		const TSharedRef<IPropertyHandle> & InActorPropertyHandle,
 		const TSharedRef<IPropertyHandle> & InActorDataHandle
 	);
-	static void FindRootMeshComponents
+	static void FindDefaultRootMeshComponentsFromClass
 	(
 		UClass * InClass,
 		const TSharedRef<IPropertyHandleArray> & InMeshArrayHandle,
-		const TSharedRef<IPropertyHandleArray> & InMeshDataArrayHandle
+		const TSharedRef<IPropertyHandleArray> & InMeshUnequipSocketArrayHandle,
+		const TSharedRef<IPropertyHandleArray> & InMeshEquipSocketArrayHandle
 	);
-	static void AddRootMeshesSlate
+	static void AddRootMeshesSlateToVerticalBox
 	(
 		const TSharedRef<SVerticalBox> & InVerticalBox,
 		const TSharedRef<IPropertyHandleArray> & InMeshArrayHandle,
-		const TSharedRef<IPropertyHandleArray> & InMeshDataArrayHandle
+		const TSharedRef<IPropertyHandleArray> & InMeshUnequipSocketArrayHandle,
+		const TSharedRef<IPropertyHandleArray> & InMeshEquipSocketArrayHandle
 	);
-
-	static void FindRootColliderComponents
+	static void FindDefaultRootColliderComponentsFromClass
 	(
 		UClass * InClass,
 		const TSharedRef<IPropertyHandleArray> & InColliderArrayHandle,
 		const TSharedRef<IPropertyHandleArray> & InColliderDataArrayHandle
 	);
-	static void AddRootCollidersSlate
+	static void AddRootCollidersSlateToVerticalBox
 	(
 		const TSharedRef<SVerticalBox> & InVerticalBox,
 		const TSharedRef<IPropertyHandleArray> & InColliderArrayHandle,
