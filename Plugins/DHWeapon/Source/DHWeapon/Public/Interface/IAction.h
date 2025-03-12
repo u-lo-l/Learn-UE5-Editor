@@ -14,6 +14,10 @@ class DHWEAPON_API IIAction
 {
 	GENERATED_BODY()
 public:
+	virtual void Init(ACharacter * InOwnerCharacter, const TArray<FDH_ActionData> * InActionDatas) = 0;
+	virtual void RequestAction() = 0;
+	virtual void OnWeaponBeginOverlap(AActor * HitActor) = 0;
+	virtual void OnWeaponEndOverlap(AActor * HitActor) = 0;
 	// UFUNCTION()
 	// virtual bool TryAction();
 	// UFUNCTION()

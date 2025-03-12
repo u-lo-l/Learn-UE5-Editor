@@ -43,5 +43,5 @@ struct FDH_DamageData
 	UPROPERTY(EditAnywhere, Category = "CameraShake")
 	bool bUseCameraShake = false;
 	UPROPERTY(EditAnywhere, Category = "CameraShake")
-	TObjectPtr<UCameraShakeBase> CameraShake;
+	TSubclassOf<UCameraShakeBase> CameraShakeClass;
 };

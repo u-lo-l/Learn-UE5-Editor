@@ -10,7 +10,7 @@ struct FDH_ActionData
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, Category = "Action")
-	TObjectPtr<UAnimMontage> ActionMontage;
+	UAnimMontage * ActionMontage;
 	UPROPERTY(EditAnywhere, Category = "Action")
 	bool bCanMoveOnAction = false;
 	UPROPERTY(EditAnywhere, Category = "Action")

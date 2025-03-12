@@ -13,13 +13,13 @@ class DHWEAPON_API UDHActionBase : public UObject, public IIAction
 {
 	GENERATED_BODY()
 	friend UDH_WeaponDataAsset;
-	
-protected:
-	void Init(ACharacter * InOwnerCharacter, TArray<FDH_ActionData> * InActionDatas);
-
+public:
+	virtual void Init(ACharacter * InOwnerCharacter, const TArray<FDH_ActionData> * InActionDatas) override;
+	virtual void RequestAction() override {};
+	virtual void OnWeaponBeginOverlap(AActor * HitActor) override {}
+	virtual void OnWeaponEndOverlap(AActor * HitActor) override {}
 protected:
 	UPROPERTY()
 	ACharacter * OwnerCharacter;
-	
-	TArray<FDH_ActionData> * ActionDatas;
+	const TArray<FDH_ActionData> * ActionDatas;
 };

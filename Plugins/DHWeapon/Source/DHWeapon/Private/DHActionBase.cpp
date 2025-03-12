@@ -1,7 +1,7 @@
 ﻿#include "DHActionBase.h"
 #include "DHWeapon.h"
 
-void UDHActionBase::Init( ACharacter * InOwnerCharacter, TArray<FDH_ActionData> * InActionDatas )
+void UDHActionBase::Init( ACharacter * InOwnerCharacter, const TArray<FDH_ActionData> * InActionDatas )
 {
 	if (InOwnerCharacter == nullptr)
 	{

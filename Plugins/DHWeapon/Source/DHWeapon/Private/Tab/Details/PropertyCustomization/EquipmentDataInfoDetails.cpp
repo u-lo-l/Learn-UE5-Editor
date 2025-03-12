@@ -119,7 +119,7 @@ void FEquipmentDataInfoDetails::CustomizeChildren( TSharedRef<IPropertyHandle> P
 		]
 		+ SVerticalBox::Slot().VAlign(VAlign_Center).AutoHeight()
 		[
-			SNew(SBox).IsEnabled(bUseEquipMontage)
+			SNew(SBox).IsEnabled(bUseUnequipMontage)
 			[
 				WeaponDAEditorHelper::CreateCheckBox
 				(

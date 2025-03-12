@@ -4,6 +4,8 @@
 #include "UObject/Interface.h"
 #include "IEquip.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FEquipmentDelegate);
+
 UINTERFACE()
 class UIEquip : public UInterface
 {
@@ -14,12 +16,6 @@ class DHWEAPON_API IIEquip
 {
 	GENERATED_BODY()
 public:
-	// UFUNCTION()
-	// virtual void Equip();
-	// UFUNCTION()
-	// virtual void Begin_Equip();
-	// UFUNCTION()
-	// virtual void End_Equip();
-	// UFUNCTION()
-	// virtual void Unequip();
+	virtual void RequestEquip(FEquipmentDelegate OnMontageBlendingOut = {}) = 0;
+	virtual void RequestUnequip(FEquipmentDelegate OnMontageBlendingOut = {}) = 0;
 };

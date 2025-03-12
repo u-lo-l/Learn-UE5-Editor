@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "DH_WeaponActorData.generated.h"
 
-class UDH_WeaponDataAsset;
+// class UDH_WeaponDataAsset;
 
 UENUM()
 enum class EDH_ColliderAttachType : uint8
@@ -12,11 +12,11 @@ enum class EDH_ColliderAttachType : uint8
 };
 
 USTRUCT()
-struct FDH_WeaponActorData
+struct DHWEAPON_API FDH_WeaponActorData
 {
 	GENERATED_BODY()
 private:
-	friend UDH_WeaponDataAsset;
+	friend class UDH_WeaponDataAsset;
 public:
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	TArray<FName> MeshNames;
@@ -35,11 +35,12 @@ public:
 	const FName & GetColliderSocket(const FName & MeshName) const;
 private:
 	void UpdateSocketMapOnPreSave();
+	UPROPERTY()
 	TMap<FName, FName> MeshUnequipSocketsTable;
+	UPROPERTY()
 	TMap<FName, FName> MeshEquipSocketsTable;
+	UPROPERTY()
 	TMap<FName, FName> ColliderSocketsTable;
 public:
 	const static FName NoNamed;
 };
-
-

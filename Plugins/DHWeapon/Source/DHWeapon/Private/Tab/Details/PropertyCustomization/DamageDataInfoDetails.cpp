@@ -407,7 +407,7 @@ TSharedRef<SWidget> FDamageDataInfoDetails::CameraShakeNameContent ( const TShar
 
 TSharedRef<SWidget> FDamageDataInfoDetails::CameraShakeValueContent ( const TSharedRef<IPropertyHandle> & PropertyHandle )
 {
-	TSharedRef<IPropertyHandle> CameraShakeHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, CameraShake)).ToSharedRef();
+	TSharedRef<IPropertyHandle> CameraShakeHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, CameraShakeClass)).ToSharedRef();
 	return SNew(SBox).MinDesiredWidth(500).MaxDesiredWidth(500)
 		[
 			CameraShakeHandle->CreatePropertyValueWidget()

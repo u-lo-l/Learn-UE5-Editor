@@ -32,7 +32,9 @@ TSharedRef<IDetailCustomization> FWeaponDataAssetDetailCustomization::MakeInstan
 void FWeaponDataAssetDetailCustomization::CustomizeDetails( IDetailLayoutBuilder & DetailBuilder )
 {
 #pragma region Get Handles;
-	TSharedRef<IPropertyHandle> ActorHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, WeaponActors));
+	TSharedRef<IPropertyHandle> AnimLayerHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, AnimLayer));
+
+	TSharedRef<IPropertyHandle> ActorHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, WeaponActorClasses));
 	TSharedRef<IPropertyHandle> ActorDataHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, ActorDatas));
 	
 	TSharedRef<IPropertyHandle> EquipmentClassHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, EquipmentClass));
@@ -47,6 +49,8 @@ void FWeaponDataAssetDetailCustomization::CustomizeDetails( IDetailLayoutBuilder
 	TSharedRef<IPropertyHandle> FinisherActionHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, Finisher));
 	TSharedRef<IPropertyHandle> AirActionHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, AirActions));
 
+	DetailBuilder.HideProperty(AnimLayerHandle);
+	
 	DetailBuilder.HideProperty(ActorHandle);
 	DetailBuilder.HideProperty(ActorDataHandle);
 	
@@ -67,8 +71,12 @@ void FWeaponDataAssetDetailCustomization::CustomizeDetails( IDetailLayoutBuilder
 	IDetailCategoryBuilder& WeaponActorDataCategory = DetailBuilder.EditCategory("Weapon", FText::FromString("Weapon Actor"));
 	IDetailCategoryBuilder & HitDataCategory = DetailBuilder.EditCategory("Hit", FText::FromString("Hit"));
 
-	MovementDataCategory.AddCustomRow(FText::FromString("TODO Movement"))
-	.NameContent() [ SNew(STextBlock).Text(FText::FromString("TODO"))];
+	MovementDataCategory
+	// .AddCustomRow(FText::FromString("TODO Movement"))
+	// .NameContent() [ SNew(STextBlock).Text(FText::FromString("TODO"))];
+	.AddProperty(AnimLayerHandle);
+
+	
 	// Weapon Actor 섹션
 	CreateActorCategory(WeaponActorDataCategory, DetailBuilder, ActorHandle, ActorDataHandle,"Weapon Actor");
 	

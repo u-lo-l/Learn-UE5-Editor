@@ -8,9 +8,6 @@
 struct FDH_EquipmentData;
 class UDH_WeaponDataAsset;
 
-DECLARE_MULTICAST_DELEGATE(FEquipmentBeginEquip);
-DECLARE_MULTICAST_DELEGATE(FEquipmentEndEquip);
-DECLARE_MULTICAST_DELEGATE(FEquipmentUnequip);
 
 UCLASS(Abstract, Blueprintable)
 class DHWEAPON_API UDHEquipBase : public UObject, public IIEquip
@@ -18,20 +15,29 @@ class DHWEAPON_API UDHEquipBase : public UObject, public IIEquip
 	GENERATED_BODY()
 	friend UDH_WeaponDataAsset;
 
-protected:
+public:
+	virtual void RequestEquip( FEquipmentDelegate OnMontageBlendingOut = {} ) override;
+	virtual void RequestUnequip(FEquipmentDelegate OnMontageBlendingOut = {}) override;
+	void BroadcastEquipDelegates();
+	void BroadcastUnequipDelegates();
+	void LinkAnimLayer();
 	void Init
 	(
 		ACharacter* InOwnerCharacter,
-		FDH_EquipmentData* InEquipData,
-		FDH_EquipmentData* InUnequipData
+		const FDH_EquipmentData* InEquipData,
+		TSubclassOf<UAnimInstance> EquipAnimLayerClass
 	);
-protected:
-	FEquipmentBeginEquip OnEquipmentBeginEquip;
-	FEquipmentBeginEquip OnEquipmentEndEquip;
-	FEquipmentUnequip OnEquipmentUnequip;
+	
+	FEquipmentDelegate OnEquipWeapon;
+	FEquipmentDelegate OnUnequipWeapon;
 
+protected:
 	UPROPERTY()
 	ACharacter * OwnerCharacter;
-	FDH_EquipmentData * EquipData;
-	FDH_EquipmentData * UnequipData;
+	UPROPERTY()
+	UAnimInstance * AnimInstance;
+	UPROPERTY()
+	TSubclassOf<UAnimInstance> EquipAnimLayer;
+	
+	const FDH_EquipmentData * EquipData;
 };
