@@ -244,7 +244,9 @@ void ADHWeaponBase::OnBeginOverlap
 	}
 	AlreadyOverlapped.Add(OtherActor);
 	if (OnWeaponBeginOverlap.IsBound() == true)
+	{
 		OnWeaponBeginOverlap.Broadcast(OtherActor);
+	}
 }
 
 void ADHWeaponBase::OnEndOverlap

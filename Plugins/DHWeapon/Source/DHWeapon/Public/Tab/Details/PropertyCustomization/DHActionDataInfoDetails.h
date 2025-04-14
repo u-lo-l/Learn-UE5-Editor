@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
 
-class DHWEAPON_API FActionDataInfoDetails final
+class DHWEAPON_API FDHActionDataInfoDetails final
 	: public IPropertyTypeCustomization
 {
 public:

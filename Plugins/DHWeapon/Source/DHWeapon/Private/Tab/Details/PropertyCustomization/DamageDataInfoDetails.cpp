@@ -285,7 +285,7 @@ TSharedRef<SWidget> FDamageDataInfoDetails::LaunchNameContent ( const TSharedRef
 TSharedRef<SWidget> FDamageDataInfoDetails::LaunchValueContent ( const TSharedRef<IPropertyHandle> & PropertyHandle )
 {
 	TSharedRef<IPropertyHandle> LaunchPowerHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, LaunchPower)).ToSharedRef();
-	TSharedRef<IPropertyHandle> LaunchDirectionHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, LaunchDirection)).ToSharedRef();
+	TSharedRef<IPropertyHandle> LaunchTypeHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, LaunchType)).ToSharedRef();
 	return SNew(SVerticalBox)
 		+ SVerticalBox::Slot().VAlign(VAlign_Center).AutoHeight()
 		[
@@ -312,14 +312,14 @@ TSharedRef<SWidget> FDamageDataInfoDetails::LaunchValueContent ( const TSharedRe
 			[
 				SNew(SBox).MinDesiredWidth(100)
 				[
-					LaunchDirectionHandle->CreatePropertyNameWidget()
+					LaunchTypeHandle->CreatePropertyNameWidget()
 				]
 			]
 			+ SHorizontalBox::Slot().MaxWidth(400)
 			[
 				SNew(SBox).MinDesiredWidth(400)
 				[
-					WeaponDAEditorHelper::CreateVector(LaunchDirectionHandle)
+					LaunchTypeHandle->CreatePropertyValueWidget()
 				]
 			]
 		];
@@ -336,9 +336,9 @@ TSharedRef<SWidget> FDamageDataInfoDetails::SoundValueContent ( const TSharedRef
 	TSharedRef<IPropertyHandle> SoundHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_DamageData, Sound)).ToSharedRef();
 
 	return SNew(SBox).MinDesiredWidth(500).MaxDesiredWidth(500)
-		[
-			SoundHandle->CreatePropertyValueWidget()
-		];
+	[
+		SoundHandle->CreatePropertyValueWidget()
+	];
 }
 
 TSharedRef<SWidget> FDamageDataInfoDetails::EffectNameContent ( const TSharedRef<IPropertyHandle> & PropertyHandle )

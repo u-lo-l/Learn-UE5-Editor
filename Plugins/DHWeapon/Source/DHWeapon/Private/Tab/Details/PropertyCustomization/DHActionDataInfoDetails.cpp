@@ -1,4 +1,4 @@
-﻿#include "Tab/Details/PropertyCustomization/ActionDataInfoDetails.h"
+﻿#include "Tab/Details/PropertyCustomization/DHActionDataInfoDetails.h"
 
 #include "DetailWidgetRow.h"
 #include "IDetailChildrenBuilder.h"
@@ -9,12 +9,12 @@
 #include "Widgets/Layout/SUniformGridPanel.h"
 
 
-TSharedRef<IPropertyTypeCustomization> FActionDataInfoDetails::MakeInstance()
+TSharedRef<IPropertyTypeCustomization> FDHActionDataInfoDetails::MakeInstance()
 {
-	return MakeShareable(new FActionDataInfoDetails);
+	return MakeShareable(new FDHActionDataInfoDetails);
 }
 
-void FActionDataInfoDetails::CustomizeHeader
+void FDHActionDataInfoDetails::CustomizeHeader
 (
 	TSharedRef<IPropertyHandle> PropertyHandle,
 	FDetailWidgetRow & HeaderRow,
@@ -22,7 +22,7 @@ void FActionDataInfoDetails::CustomizeHeader
 )
 {}
 
-void FActionDataInfoDetails::CustomizeChildren
+void FDHActionDataInfoDetails::CustomizeChildren
 (
 	TSharedRef<IPropertyHandle> PropertyHandle,
 	IDetailChildrenBuilder & ChildBuilder,
@@ -189,7 +189,7 @@ void FActionDataInfoDetails::CustomizeChildren
 	END_BORDER_VALUECONTENT;
 }
 
-TSharedRef<SWidget> FActionDataInfoDetails::SDamageData
+TSharedRef<SWidget> FDHActionDataInfoDetails::SDamageData
 (
 	const TSharedRef<IPropertyHandle> & ElementHandle,
 	IPropertyTypeCustomizationUtils & CustomizationUtils

@@ -9,6 +9,7 @@ class IDetailCategoryBuilder;
 class DHWEAPON_API FWeaponDataAssetDetailCustomization final
 	: public IDetailCustomization
 {
+	using ThisClass = FWeaponDataAssetDetailCustomization;
 public:
 	static TSharedRef<IDetailCustomization> MakeInstance();
 	virtual void CustomizeDetails( IDetailLayoutBuilder & DetailBuilder ) override;
@@ -40,6 +41,7 @@ private:
 private:
 	FWeaponDataAssetDetailCustomization() {}
 	static FSlateFontInfo GetBoldFont( float InSize = 9 );
+	static FSlateFontInfo GetDetailFont( float InSize = 9 );
 	static FSimpleDelegate OnPropertyChanged(IDetailLayoutBuilder & DetailBuilder);
 
 	static TSharedRef<SVerticalBox> CreateActorInfo

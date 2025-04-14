@@ -8,7 +8,7 @@
 
 #include "Tab/Details/DHWeaponBaseDetailCustomization.h"
 #include "Tab/Details/WeaponDataAssetDetailCustomization.h"
-#include "Tab/Details/PropertyCustomization/ActionDataInfoDetails.h"
+#include "Tab/Details/PropertyCustomization/DHActionDataInfoDetails.h"
 #include "Tab/Details/PropertyCustomization/ActorDataInfoDetails.h"
 #include "Tab/Details/PropertyCustomization/DamageDataInfoDetails.h"
 #include "Tab/Details/PropertyCustomization/EquipmentDataInfoDetails.h"
@@ -46,7 +46,7 @@ void FDHWeaponModule::StartupModule()
 
 	const FName ActionDataName = FDH_ActionData::StaticStruct()->GetFName();
 	FOnGetPropertyTypeCustomizationInstance ActionDataPropInstance;
-	ActionDataPropInstance.BindStatic(&FActionDataInfoDetails::MakeInstance);
+	ActionDataPropInstance.BindStatic(&FDHActionDataInfoDetails::MakeInstance);
 	PropertyEditorModule.RegisterCustomPropertyTypeLayout
 	(
 		ActionDataName,

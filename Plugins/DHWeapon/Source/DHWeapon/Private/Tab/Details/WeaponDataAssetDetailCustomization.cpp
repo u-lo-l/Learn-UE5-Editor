@@ -3,7 +3,7 @@
 #include "DetailCategoryBuilder.h"
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"
-#include "DHWeaponBase.h"
+#include "DHTriggeringActionBase.h"
 #include "IDetailGroup.h"
 #include "Data/DH_WeaponDataAsset.h"
 #include "Style/WeaponDataStyle.h"
@@ -14,6 +14,15 @@ FSlateFontInfo FWeaponDataAssetDetailCustomization::GetBoldFont( float InSize )
 	font.Size = InSize;
 	font.OutlineSettings.OutlineColor = FColor::Black;
 	font.OutlineSettings.OutlineSize = 2.f;
+	return font;
+}
+
+FSlateFontInfo FWeaponDataAssetDetailCustomization::GetDetailFont( float InSize )
+{
+	FSlateFontInfo font = IDetailLayoutBuilder::GetDetailFont();
+	font.Size = InSize;
+	font.OutlineSettings.OutlineColor = FColor::Black;
+	font.OutlineSettings.OutlineSize = 1.f;
 	return font;
 }
 
@@ -41,13 +50,15 @@ void FWeaponDataAssetDetailCustomization::CustomizeDetails( IDetailLayoutBuilder
 	TSharedRef<IPropertyHandle> EquipmentHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, EquipmentData));
 
 	TSharedRef<IPropertyHandle> LightActionClassHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, LightActionClass));
-	TSharedRef<IPropertyHandle> GuardActionClassHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, GuardActionClass));
+	TSharedRef<IPropertyHandle> HeavyActionClassHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, HeavyActionClass));
+	TSharedRef<IPropertyHandle> DefenseActionClassHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, DefenseActionClass));
 	TSharedRef<IPropertyHandle> FinisherActionClassHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, FinisherActionClass));
 	TSharedRef<IPropertyHandle> AirActionClassHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, AirActionClass));
-	TSharedRef<IPropertyHandle> LightActionHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, LightActions));
-	TSharedRef<IPropertyHandle> GuardActionHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, GuardAction));
-	TSharedRef<IPropertyHandle> FinisherActionHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, Finisher));
-	TSharedRef<IPropertyHandle> AirActionHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, AirActions));
+	TSharedRef<IPropertyHandle> LightActionHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, LightActionDatas));
+	TSharedRef<IPropertyHandle> HeavyActionHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, HeavyActionDatas));
+	TSharedRef<IPropertyHandle> DefenseActionHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, DefenseActionData));
+	TSharedRef<IPropertyHandle> FinisherActionHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, FinisherData));
+	TSharedRef<IPropertyHandle> AirActionHandle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UDH_WeaponDataAsset, AirActionDatas));
 
 	DetailBuilder.HideProperty(AnimLayerHandle);
 	
@@ -56,13 +67,15 @@ void FWeaponDataAssetDetailCustomization::CustomizeDetails( IDetailLayoutBuilder
 	
 	DetailBuilder.HideProperty(EquipmentClassHandle);
 	DetailBuilder.HideProperty(LightActionClassHandle);
-	DetailBuilder.HideProperty(GuardActionClassHandle);
+	DetailBuilder.HideProperty(HeavyActionClassHandle);
+	DetailBuilder.HideProperty(DefenseActionClassHandle);
 	DetailBuilder.HideProperty(FinisherActionClassHandle);
 	DetailBuilder.HideProperty(AirActionClassHandle);
 	
 	DetailBuilder.HideProperty(EquipmentHandle);
 	DetailBuilder.HideProperty(LightActionHandle);
-	DetailBuilder.HideProperty(GuardActionHandle);
+	DetailBuilder.HideProperty(HeavyActionHandle);
+	DetailBuilder.HideProperty(DefenseActionHandle);
 	DetailBuilder.HideProperty(FinisherActionHandle);
 	DetailBuilder.HideProperty(AirActionHandle);
 #pragma endregion Get Handles
@@ -84,10 +97,11 @@ void FWeaponDataAssetDetailCustomization::CustomizeDetails( IDetailLayoutBuilder
 	CreateEquipmentCategory(WeaponActorDataCategory, DetailBuilder, EquipmentClassHandle, EquipmentHandle, "Equipment");
 	
 	// Action 섹션
-	CreateActionCategory(WeaponActorDataCategory, DetailBuilder, LightActionClassHandle, LightActionHandle, "LightActions");
-	CreateActionCategory(WeaponActorDataCategory, DetailBuilder, GuardActionClassHandle, GuardActionHandle, "GuardActions");
+	CreateActionCategory(WeaponActorDataCategory, DetailBuilder, LightActionClassHandle, LightActionHandle, "LightActionDatas");
+	CreateActionCategory(WeaponActorDataCategory, DetailBuilder, HeavyActionClassHandle, HeavyActionHandle, "HeavyActionDatas");
+	CreateActionCategory(WeaponActorDataCategory, DetailBuilder, DefenseActionClassHandle, DefenseActionHandle, "GuardActions");
 	CreateActionCategory(WeaponActorDataCategory, DetailBuilder, FinisherActionClassHandle, FinisherActionHandle, "FinisherActions");
-	CreateActionCategory(WeaponActorDataCategory, DetailBuilder, AirActionClassHandle, AirActionHandle, "AirActions");
+	CreateActionCategory(WeaponActorDataCategory, DetailBuilder, AirActionClassHandle, AirActionHandle, "AirActionDatas");
 
 	HitDataCategory.AddCustomRow(FText::FromString("TODO Damage"))
 	.NameContent() [ SNew(STextBlock).Text(FText::FromString("TODO"))];
@@ -293,21 +307,41 @@ void FWeaponDataAssetDetailCustomization::CreateActionCategory
 {
 	InClassHandle->SetOnPropertyValueChanged(OnPropertyChanged(DetailBuilder));
 	
-	UObject * Temp = nullptr;
-	InClassHandle->GetValue(Temp);
-	const bool HasActionClass = Temp != nullptr;
+	UClass * ActionClass = nullptr;
+	InClassHandle->GetValue(reinterpret_cast<UObject *&>(ActionClass));
+	const bool HasActionClass = ActionClass != nullptr;
+	EDHActionType ActionType = EDHActionType::Triggering;
+	if (HasActionClass)
+	{
+		ActionType = ActionClass->IsChildOf(UDHTriggeringActionBase::StaticClass()) ? EDHActionType::Triggering : EDHActionType::Holding;
+		TSharedPtr<IPropertyHandle> ActionTypeHandle = InActionHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDH_ActionData, ActionType));
+		if (ActionTypeHandle.IsValid())
+		{
+			ActionTypeHandle->SetValue(static_cast<uint8>(ActionType));
+		}
+	}
+
 	TSharedRef<SHorizontalBox> ActionHeaderValueContent = SNew(SHorizontalBox);
 	{
+		ActionHeaderValueContent->AddSlot().AutoWidth().HAlign(HAlign_Left).VAlign(VAlign_Center).Padding(0,5) [
+			SNew(STextBlock)
+			.Text(FText::FromString(ActionType == EDHActionType::Triggering ? TEXT("Triggering Action") : TEXT("Holding Action")))
+			.MinDesiredWidth(100)
+			.Font(ThisClass::GetBoldFont(10))
+			.Justification(ETextJustify::Right)
+			.ColorAndOpacity(FLinearColor(.5f,.5f,.75f, 1.f))
+			.Visibility(HasActionClass ? EVisibility::Visible : EVisibility::Hidden )
+	   ];
 		ActionHeaderValueContent->AddSlot().AutoWidth().HAlign(HAlign_Left) [
 		   InClassHandle->CreatePropertyValueWidget()
 	   ];
 		ActionHeaderValueContent->AddSlot().AutoWidth().HAlign(HAlign_Left).VAlign(VAlign_Center).FillWidth(1.0f).Padding(2.0f,0,0,0) [
 			SNew(STextBlock)
-				.Text(FText::FromString(TEXT("Action   Class   Not   Assigned")))
-				.Font(GetBoldFont())
-				.Justification(ETextJustify::Center)
-				.ColorAndOpacity(FLinearColor(0.5f,0.1f,0.1f, 1.f))
-				.Visibility(HasActionClass ? EVisibility::Hidden : EVisibility::Visible )
+			.Text(FText::FromString(TEXT("Action   Class   Not   Assigned")))
+			.Font(GetBoldFont())
+			.Justification(ETextJustify::Center)
+			.ColorAndOpacity(FLinearColor(0.5f,0.1f,0.1f, 1.f))
+			.Visibility(HasActionClass ? EVisibility::Hidden : EVisibility::Visible )
 		];
 		if (InActionHandle->AsArray() != nullptr)
 		{

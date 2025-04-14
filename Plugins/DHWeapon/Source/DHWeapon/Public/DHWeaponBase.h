@@ -7,7 +7,7 @@
 
 struct FDH_WeaponActorData;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnWeaponOverlap, AActor * /*VictimActor*/)
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnWeaponOverlap, AActor */*VictimActor*/)
 
 USTRUCT()
 struct FShapesInMesh

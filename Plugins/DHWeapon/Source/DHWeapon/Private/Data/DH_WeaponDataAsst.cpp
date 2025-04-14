@@ -1,10 +1,10 @@
-#include "DHActionBase.h"
+#include "DHTriggeringActionBase.h"
 #include "DHEquipBase.h"
 #include "DHWeaponBase.h"
 #include "Data/DH_WeaponDataAsset.h"
 #include "UObject/ObjectSaveContext.h"
 
-UAnimMontage * FDirectionalMontages::GetMontage( const FVector & Forward, const FVector & Right, const FVector & Direction )
+UAnimMontage * FDirectionalMontages::GetMontage( const FVector & Forward, const FVector & Right, const FVector & Direction ) const
 {
 	const float DotForward = FVector::DotProduct(Direction, Forward);
 	const float DotRight = FVector::DotProduct(Direction, Right);
@@ -49,19 +49,29 @@ UClass * UDH_WeaponDataAsset::GetLightActionClass() const
 	return LightActionClass;
 }
 
+UClass * UDH_WeaponDataAsset::GetHeavyActionClass() const
+{
+	return HeavyActionClass;
+}
+
 UClass * UDH_WeaponDataAsset::GetAirActionClass() const
 {
 	return AirActionClass;
 }
 
-UClass * UDH_WeaponDataAsset::GetGuardActionClass() const
+UClass * UDH_WeaponDataAsset::GetDefenseActionClass() const
 {
-	return GuardActionClass;
+	return DefenseActionClass;
 }
 
 UClass * UDH_WeaponDataAsset::GetFinisherActionClass() const
 {
 	return FinisherActionClass;
+}
+
+UAnimMontage * UDH_WeaponDataAsset::GetDodgeMontage( const FVector & Forward, const FVector & Right, const FVector & Direction ) const
+{
+	return DodgeMontages.GetMontage(Forward, Right, Direction);
 }
 
 void UDH_WeaponDataAsset::SetWeaponDataTable()
@@ -94,34 +104,45 @@ const FDH_EquipmentData * UDH_WeaponDataAsset::GetEquipmentData() const
 
 const FDH_ActionData * UDH_WeaponDataAsset::GetLightActionData( int32 Index ) const
 {
-	checkf(LightActions.IsValidIndex(Index), TEXT("LightAction | Invalid Index"));
-	return &LightActions[Index];
+	checkf(LightActionDatas.IsValidIndex(Index), TEXT("LightAction | Invalid Index"));
+	return &LightActionDatas[Index];
 }
 
 const TArray<FDH_ActionData> * UDH_WeaponDataAsset::GetLightActionDatas() const
 {
-	return &LightActions;
+	return &LightActionDatas;
 }
 
-const FDH_ActionData * UDH_WeaponDataAsset::GetGuardActionData() const
+const FDH_ActionData * UDH_WeaponDataAsset::GetHeavyActionData( int32 Index ) const
 {
-	return &GuardAction;
+	checkf(HeavyActionDatas.IsValidIndex(Index), TEXT("HeavyAction | Invalid Index"));
+	return &HeavyActionDatas[Index];
+}
+
+const TArray<FDH_ActionData> * UDH_WeaponDataAsset::GetHeavyActionDatas() const
+{
+	return &HeavyActionDatas;
+}
+
+const FDH_ActionData * UDH_WeaponDataAsset::GetDefenseActionData() const
+{
+	return &DefenseActionData;
 }
 
 const FDH_ActionData * UDH_WeaponDataAsset::GetFinisherActionData() const
 {
-	return &Finisher;
+	return &FinisherData;
 }
 
 const FDH_ActionData * UDH_WeaponDataAsset::GetAirActionData( int32 Index ) const
 {
-	checkf(AirActions.IsValidIndex(Index), TEXT("AirAction | Invalid Index"))
-	return &AirActions[Index];
+	checkf(AirActionDatas.IsValidIndex(Index), TEXT("AirAction | Invalid Index"))
+	return &AirActionDatas[Index];
 }
 
 const TArray<FDH_ActionData> * UDH_WeaponDataAsset::GetAirActionDatas() const
 {
-	return &AirActions;
+	return &AirActionDatas;
 }
 
 int32 UDH_WeaponDataAsset::GetAWeaponClassNum() const
@@ -131,11 +152,36 @@ int32 UDH_WeaponDataAsset::GetAWeaponClassNum() const
 
 int32 UDH_WeaponDataAsset::GetLightActionDataNum() const
 {
-	return LightActions.Num();
+	return LightActionDatas.Num();
 }
 
 int32 UDH_WeaponDataAsset::GetAirActionDataNum() const
 {
-	return AirActions.Num();
+	return AirActionDatas.Num();
+}
+
+UAnimMontage * UDH_WeaponDataAsset::GetHitMontage( const FVector & Forward, const FVector & Right, const FVector & Direction ) const
+{
+	return LightDamage.GetMontage(Forward, Right, Direction);
+}
+
+UAnimMontage * UDH_WeaponDataAsset::GetHeavyHitMontage_Thrust() const
+{
+	return HeavyDamage_Thrust;
+}
+
+UAnimMontage * UDH_WeaponDataAsset::GetHeavyHitMontage_Air() const
+{
+	return HeavyDamage_Air;
+}
+
+UAnimMontage * UDH_WeaponDataAsset::GetRecoverMontage() const
+{
+	return Recover;
+}
+
+UAnimMontage * UDH_WeaponDataAsset::GetDieMontage() const
+{
+	return Die;
 }
 

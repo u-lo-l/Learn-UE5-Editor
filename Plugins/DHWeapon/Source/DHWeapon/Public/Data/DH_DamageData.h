@@ -5,6 +5,22 @@
 
 class UFXSystemAsset;
 
+UENUM()
+enum class ELaunchType : uint8
+{
+	Air,
+	Thrust,
+};
+
+UENUM()
+enum class ELaunchPower : uint32
+{
+	None = 0,
+	Light = 200,
+	Middle = 400,
+	Heavy = 800
+};
+
 USTRUCT()
 struct FDH_DamageData
 {
@@ -16,15 +32,15 @@ struct FDH_DamageData
 	UPROPERTY(EditAnywhere, Category = "Type")
 	bool bIsNonBlockable = false;
 	
-	UPROPERTY(EditAnywhere, Category = "Damage", meta = (ClampMin = "0", ClampMax = "1000", UIMin = "0", UIMax = "1000", SliderExponent = "2", Delta = "0.1"))
+	UPROPERTY(EditAnywhere, Category = "Damage", meta = (ClampMin = "0", ClampMax = "250", UIMin = "0", UIMax = "250", SliderExponent = "3", Delta = "0.5"))
 	float Damage = 0.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Launch")
 	bool bUseLaunch = false;
-	UPROPERTY(EditAnywhere, Category = "Launch", meta = (ClampMin = "0", ClampMax = "300", UIMin = "0", UIMax = "300", SliderExponent = "2", Delta = "0.1"))
-	float LaunchPower = 0.0f;
 	UPROPERTY(EditAnywhere, Category = "Launch")
-	FVector LaunchDirection = FVector::ZeroVector;
+	ELaunchPower LaunchPower = ELaunchPower::None;
+	UPROPERTY(EditAnywhere, Category = "Launch")
+	ELaunchType LaunchType = ELaunchType::Thrust;
 
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	bool bUseSound = false;

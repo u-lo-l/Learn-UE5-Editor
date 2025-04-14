@@ -1,38 +1,4 @@
-﻿#include "DHActionBase.h"
-#include "DHWeapon.h"
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-void UDHActionBase::Init( ACharacter * InOwnerCharacter, const TArray<FDH_ActionData> * InActionDatas )
-{
-	if (InOwnerCharacter == nullptr)
-	{
-		UE_LOG(
-			Log_DHWeapon,
-			Error,
-			TEXT("%hs | OwnerCharacter Not Valid"),
-			__FUNCTION__
-		);
-		return ;
-	}
-	if (InActionDatas == nullptr)
-	{
-		UE_LOG(
-			Log_DHWeapon,
-			Error,
-			TEXT("%hs | ActionDatas Not Valid"),
-			__FUNCTION__
-		);
-		return ;
-	}
-	if (InActionDatas->IsEmpty())
-	{
-		UE_LOG(
-			Log_DHWeapon,
-			Error,
-			TEXT("%hs | ActionDatas is Empty"),
-			__FUNCTION__
-		);
-		return ;
-	}
-	OwnerCharacter = InOwnerCharacter;
-	ActionDatas = InActionDatas;
-}
+
+#include "DHActionBase.h"
